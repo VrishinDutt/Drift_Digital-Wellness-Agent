@@ -1,4 +1,4 @@
-# Digital Wellness Agent
+# Drift: Digital Wellness
 
 Digital Wellness Agent is a local-first attentional-state prototype. It observes non-invasive foreground-window context, estimates attention state and drift pressure, and presents a calm PySide6 HUD called **Intentional**.
 
@@ -150,6 +150,28 @@ Expanded mode includes **Reset Session**. It archives current local telemetry an
 - Runtime data is local and ignored by git.
 
 ## Troubleshooting
+## Windows Prerequisites
+
+Before running the project on Windows, install:
+
+1. **Python 3.10+**  
+   Download: https://www.python.org/downloads/windows/  
+   During installation, enable **Add Python to PATH**.
+
+2. **Git for Windows**  
+   Download: https://git-scm.com/download/win
+
+3. **Microsoft Visual C++ Redistributable**  
+   Required by some Python desktop dependencies.  
+   Download: https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist
+
+4. **Optional: Spotify Developer Credentials**  
+   Only needed if testing Spotify context.  
+   Create an app at: https://developer.spotify.com/dashboard  
+   Redirect URI:
+
+   ```text
+   http://127.0.0.1:8888/callback
 
 If PySide6 is missing:
 
