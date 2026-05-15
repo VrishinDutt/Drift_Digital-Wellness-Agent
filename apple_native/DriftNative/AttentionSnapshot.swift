@@ -38,6 +38,7 @@ enum AttentionState: String, CaseIterable, Equatable {
     case focused
     case assistedDeepWork
     case developmentLoop
+    case researchFlow
     case neutral
     case passiveDrift
     case compulsiveDrift
@@ -53,6 +54,8 @@ enum AttentionState: String, CaseIterable, Equatable {
             return "Assisted Deep Work"
         case .developmentLoop:
             return "Development Loop"
+        case .researchFlow:
+            return "Research Flow"
         case .neutral:
             return "Neutral"
         case .passiveDrift:
@@ -77,6 +80,7 @@ enum AttentionContext: String, CaseIterable, Equatable {
     case generalBrowsing
     case passiveConsumption
     case audioRegulation
+    case paused
     case unknown
 
     var displayName: String {
@@ -88,15 +92,17 @@ enum AttentionContext: String, CaseIterable, Equatable {
         case .development:
             return "Development Loop"
         case .research:
-            return "Research Flow"
+            return "Research"
         case .generalBrowsing:
             return "General Browsing"
         case .passiveConsumption:
             return "Passive Consumption"
         case .audioRegulation:
             return "Audio Regulation"
+        case .paused:
+            return "Paused"
         case .unknown:
-            return "Unknown Context"
+            return "Unknown"
         }
     }
 }

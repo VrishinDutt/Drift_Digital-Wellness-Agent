@@ -13,6 +13,7 @@
 		81BD57BB2FB768A5003985C3 /* DriftNativeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B32FB768A5003985C3 /* DriftNativeApp.swift */; };
 		81BD57BC2FB768A5003985C3 /* InterventionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B52FB768A5003985C3 /* InterventionEngine.swift */; };
 		81BD57BD2FB768A5003985C3 /* HUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B42FB768A5003985C3 /* HUDView.swift */; };
+		81BD57C52FB768A5003985C3 /* HUDViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57C42FB768A5003985C3 /* HUDViewModel.swift */; };
 		81BD57BE2FB768A5003985C3 /* ContextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B02FB768A5003985C3 /* ContextClassifier.swift */; };
 		81BD57BF2FB768A5003985C3 /* AttentionSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57AD2FB768A5003985C3 /* AttentionSnapshot.swift */; };
 		81BD57C02FB768A5003985C3 /* MockTelemetryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B62FB768A5003985C3 /* MockTelemetryProvider.swift */; };
@@ -46,6 +47,7 @@
 		81BD57B22FB768A5003985C3 /* DriftAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftAnalyzer.swift; sourceTree = "<group>"; };
 		81BD57B32FB768A5003985C3 /* DriftNativeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftNativeApp.swift; sourceTree = "<group>"; };
 		81BD57B42FB768A5003985C3 /* HUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDView.swift; sourceTree = "<group>"; };
+		81BD57C42FB768A5003985C3 /* HUDViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDViewModel.swift; sourceTree = "<group>"; };
 		81BD57B52FB768A5003985C3 /* InterventionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterventionEngine.swift; sourceTree = "<group>"; };
 		81BD57B62FB768A5003985C3 /* MockTelemetryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTelemetryProvider.swift; sourceTree = "<group>"; };
 		81BD57B72FB768A5003985C3 /* ReasoningEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReasoningEngine.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 				81BD57B22FB768A5003985C3 /* DriftAnalyzer.swift */,
 				81BD57B32FB768A5003985C3 /* DriftNativeApp.swift */,
 				81BD57B42FB768A5003985C3 /* HUDView.swift */,
+				81BD57C42FB768A5003985C3 /* HUDViewModel.swift */,
 				81BD57B52FB768A5003985C3 /* InterventionEngine.swift */,
 				81BD57B62FB768A5003985C3 /* MockTelemetryProvider.swift */,
 				81BD57B72FB768A5003985C3 /* ReasoningEngine.swift */,
@@ -281,6 +284,7 @@
 				81BD57BB2FB768A5003985C3 /* DriftNativeApp.swift in Sources */,
 				81BD57BC2FB768A5003985C3 /* InterventionEngine.swift in Sources */,
 				81BD57BD2FB768A5003985C3 /* HUDView.swift in Sources */,
+				81BD57C52FB768A5003985C3 /* HUDViewModel.swift in Sources */,
 				81BD57BE2FB768A5003985C3 /* ContextClassifier.swift in Sources */,
 				81BD57BF2FB768A5003985C3 /* AttentionSnapshot.swift in Sources */,
 				81BD57C02FB768A5003985C3 /* MockTelemetryProvider.swift in Sources */,

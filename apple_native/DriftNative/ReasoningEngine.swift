@@ -26,8 +26,8 @@ struct ReasoningEngine {
         case .development:
             return driftScore <= 45 ? .developmentLoop : .neutral
         case .research:
-            return driftScore <= 40 ? .focused : .neutral
-        case .audioRegulation:
+            return driftScore <= 40 ? .researchFlow : .neutral
+        case .audioRegulation, .paused:
             return driftScore <= 30 ? .neutral : .passiveDrift
         case .generalBrowsing:
             return driftScore >= 55 ? .passiveDrift : .neutral

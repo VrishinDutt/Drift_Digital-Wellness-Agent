@@ -36,7 +36,7 @@ struct DriftAnalyzer {
         switch context {
         case .deepWork, .development, .assistedWork, .research:
             baseScore = 15
-        case .audioRegulation:
+        case .audioRegulation, .paused:
             baseScore = 10
         case .generalBrowsing:
             baseScore = 35
@@ -64,7 +64,7 @@ struct DriftAnalyzer {
         switch context {
         case .deepWork, .development, .assistedWork, .research:
             return 2
-        case .audioRegulation:
+        case .audioRegulation, .paused:
             return 1
         case .generalBrowsing:
             return 5
@@ -79,7 +79,7 @@ struct DriftAnalyzer {
         switch context {
         case .deepWork, .development, .assistedWork, .research:
             return true
-        case .audioRegulation, .generalBrowsing, .passiveConsumption, .unknown:
+        case .audioRegulation, .paused, .generalBrowsing, .passiveConsumption, .unknown:
             return false
         }
     }

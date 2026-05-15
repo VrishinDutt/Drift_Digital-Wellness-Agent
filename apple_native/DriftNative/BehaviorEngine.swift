@@ -35,10 +35,12 @@ struct BehaviorEngine {
             isIdle: true
         )
 
-        let context = contextClassifier.classify(
-            appName: latest.appName,
-            windowTitle: latest.windowTitle
-        )
+        let context: AttentionContext = latest.isIdle
+            ? .paused
+            : contextClassifier.classify(
+                appName: latest.appName,
+                windowTitle: latest.windowTitle
+            )
         let driftScore = driftAnalyzer.score(samples: samples, context: context)
         let state = reasoningEngine.inferState(
             context: context,

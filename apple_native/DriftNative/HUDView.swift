@@ -1,17 +1,24 @@
 import SwiftUI
 
 struct HUDView: View {
-    let snapshot: AttentionSnapshot
-    let advanceAction: () -> Void
+    @ObservedObject var viewModel: HUDViewModel
+    @State private var ringPulse = false
+
+    private var snapshot: AttentionSnapshot {
+        viewModel.snapshot
+    }
 
     private var accent: Color {
         DesignTokens.ColorToken.state(snapshot.state)
     }
 
+    private var secondaryAccent: Color {
+        DesignTokens.ColorToken.stateSecondary(snapshot.state)
+    }
+
     var body: some View {
         ZStack {
-            DesignTokens.ColorToken.appBackground
-                .ignoresSafeArea()
+            background
 
             VStack(alignment: .leading, spacing: DesignTokens.Spacing.lg) {
                 header
@@ -24,50 +31,66 @@ struct HUDView: View {
                             .font(DesignTokens.Typography.state)
                             .foregroundStyle(accent)
                             .lineLimit(2)
-                            .minimumScaleFactor(0.75)
+                            .minimumScaleFactor(0.78)
+                            .animation(.easeInOut(duration: 0.35), value: snapshot.state)
 
                         Text(snapshot.context.displayName)
                             .font(DesignTokens.Typography.metric)
                             .foregroundStyle(DesignTokens.ColorToken.secondaryText)
 
-                        Text("Drift \(snapshot.driftScore)")
-                            .font(DesignTokens.Typography.metric)
-                            .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                        HStack(spacing: DesignTokens.Spacing.sm) {
+                            scorePill
+                            telemetryPill
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
 
-                        Text("Latest: \(snapshot.latestApp)")
-                            .font(DesignTokens.Typography.metric)
-                            .foregroundStyle(DesignTokens.ColorToken.secondaryText)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
+                Divider()
+                    .overlay(DesignTokens.ColorToken.quietBorder)
 
-                        statusPill
+                VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+                    vitalRow(label: "Latest app", value: snapshot.latestApp)
+
+                    if let latestTitle = snapshot.latestTitle, !latestTitle.isEmpty {
+                        vitalRow(label: "Surface", value: latestTitle)
                     }
                 }
 
-                interventionCard
+                interventionPanel
 
-                HStack {
-                    Text("Updated \(snapshot.lastUpdated, style: .time)")
-                        .font(DesignTokens.Typography.caption)
-                        .foregroundStyle(DesignTokens.ColorToken.quietText)
-
-                    Spacer()
-
-                    Button("Demo Next", action: advanceAction)
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                }
+                footer
             }
             .padding(DesignTokens.Spacing.lg)
-            .background(glassBackground)
-            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.card, style: .continuous))
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DesignTokens.Radius.card, style: .continuous))
+            .overlay(glassOverlay)
             .overlay(
                 RoundedRectangle(cornerRadius: DesignTokens.Radius.card, style: .continuous)
                     .stroke(DesignTokens.ColorToken.glassBorder, lineWidth: 1)
             )
-            .shadow(color: .black.opacity(0.32), radius: 24, x: 0, y: 12)
+            .shadow(color: .black.opacity(0.34), radius: 28, x: 0, y: 18)
             .padding(DesignTokens.Spacing.lg)
         }
+        .onChange(of: snapshot.id) { _, _ in
+            triggerRingPulse()
+        }
+    }
+
+    private var background: some View {
+        ZStack {
+            DesignTokens.ColorToken.appBackground
+
+            LinearGradient(
+                colors: [
+                    secondaryAccent.opacity(0.22),
+                    Color.clear,
+                    accent.opacity(0.12)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+        .ignoresSafeArea()
     }
 
     private var header: some View {
@@ -83,40 +106,82 @@ struct HUDView: View {
             }
 
             Spacer()
+
+            statusDot
         }
     }
 
     private var stateRing: some View {
-        ZStack {
+        let progress = CGFloat(snapshot.driftScore) / 100
+
+        return ZStack {
             Circle()
-                .fill(accent.opacity(0.08))
-                .frame(width: 132, height: 132)
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            accent.opacity(0.18),
+                            accent.opacity(0.045),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: 8,
+                        endRadius: DesignTokens.Layout.ringSize / 2
+                    )
+                )
 
             Circle()
-                .stroke(accent.opacity(0.24), lineWidth: 16)
-                .frame(width: 112, height: 112)
+                .stroke(DesignTokens.ColorToken.ringTrack, lineWidth: DesignTokens.Layout.ringLineWidth)
 
             Circle()
-                .trim(from: 0, to: CGFloat(snapshot.driftScore) / 100)
-                .stroke(accent, style: StrokeStyle(lineWidth: 16, lineCap: .round))
+                .trim(from: 0, to: progress)
+                .stroke(
+                    AngularGradient(
+                        colors: [accent, secondaryAccent, accent],
+                        center: .center
+                    ),
+                    style: StrokeStyle(
+                        lineWidth: DesignTokens.Layout.ringLineWidth,
+                        lineCap: .round
+                    )
+                )
                 .rotationEffect(.degrees(-90))
-                .frame(width: 112, height: 112)
+                .animation(.easeInOut(duration: 0.45), value: snapshot.driftScore)
 
             VStack(spacing: DesignTokens.Spacing.xs) {
                 Text("\(snapshot.driftScore)")
-                    .font(.system(size: 28, weight: .semibold, design: .rounded))
+                    .font(DesignTokens.Typography.score)
                     .foregroundStyle(accent)
+                    .contentTransition(.numericText())
 
                 Text("DRIFT")
                     .font(DesignTokens.Typography.caption)
                     .foregroundStyle(DesignTokens.ColorToken.secondaryText)
             }
         }
+        .frame(width: DesignTokens.Layout.ringSize, height: DesignTokens.Layout.ringSize)
+        .scaleEffect(ringPulse ? 1.025 : 1)
+        .animation(.easeOut(duration: 0.28), value: ringPulse)
         .accessibilityLabel("Drift score \(snapshot.driftScore)")
     }
 
-    private var statusPill: some View {
-        Text("Telemetry: \(snapshot.telemetryStatus.displayName)")
+    private var scorePill: some View {
+        Text("Drift \(snapshot.driftScore)")
+            .font(DesignTokens.Typography.caption)
+            .foregroundStyle(accent)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(accent.opacity(0.11))
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(accent.opacity(0.26), lineWidth: 1)
+            )
+    }
+
+    private var telemetryPill: some View {
+        let statusColor = DesignTokens.ColorToken.telemetry(snapshot.telemetryStatus)
+
+        return Text(snapshot.telemetryStatus.displayName)
             .font(DesignTokens.Typography.caption)
             .foregroundStyle(statusColor)
             .padding(.horizontal, 10)
@@ -125,46 +190,122 @@ struct HUDView: View {
             .clipShape(Capsule())
             .overlay(
                 Capsule()
-                    .stroke(statusColor.opacity(0.30), lineWidth: 1)
+                    .stroke(statusColor.opacity(0.28), lineWidth: 1)
             )
     }
 
-    private var interventionCard: some View {
+    private var statusDot: some View {
+        let statusColor = DesignTokens.ColorToken.telemetry(snapshot.telemetryStatus)
+
+        return HStack(spacing: 6) {
+            Circle()
+                .fill(statusColor)
+                .frame(width: 7, height: 7)
+
+            Text("Telemetry \(snapshot.telemetryStatus.displayName)")
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(DesignTokens.ColorToken.panelBackground)
+        .clipShape(Capsule())
+    }
+
+    private func vitalRow(label: String, value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(label)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+                .frame(width: 78, alignment: .leading)
+
+            Text(value)
+                .font(DesignTokens.Typography.metric)
+                .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                .lineLimit(1)
+                .truncationMode(.tail)
+
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var interventionPanel: some View {
         Text(snapshot.interventionMessage)
             .font(DesignTokens.Typography.intervention)
             .foregroundStyle(DesignTokens.ColorToken.primaryText)
             .lineSpacing(2)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(DesignTokens.Spacing.md)
-            .background(Color.white.opacity(0.055))
+            .background(DesignTokens.ColorToken.elevatedPanelBackground)
             .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.innerCard, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: DesignTokens.Radius.innerCard, style: .continuous)
-                    .stroke(accent.opacity(0.30), lineWidth: 1)
+                    .stroke(accent.opacity(0.24), lineWidth: 1)
             )
     }
 
-    private var glassBackground: some View {
-        LinearGradient(
-            colors: [
-                Color.white.opacity(0.12),
-                Color.white.opacity(0.055)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+    private var footer: some View {
+        HStack(spacing: DesignTokens.Spacing.md) {
+            Text("Updated \(snapshot.lastUpdated, style: .time)")
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+
+            Spacer()
+
+            Toggle(
+                "Auto",
+                isOn: Binding(
+                    get: { viewModel.isAutoCycleEnabled },
+                    set: { isEnabled in
+                        if isEnabled {
+                            viewModel.startMockCycle()
+                        } else {
+                            viewModel.stopMockCycle()
+                        }
+                    }
+                )
+            )
+            .toggleStyle(.switch)
+            .controlSize(.mini)
+            .font(DesignTokens.Typography.caption)
+            .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+
+            Button {
+                viewModel.advanceSnapshot()
+            } label: {
+                Label("Next State", systemImage: "arrow.triangle.2.circlepath")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .tint(accent)
+        }
     }
 
-    private var statusColor: Color {
-        switch snapshot.telemetryStatus {
-        case .mocked:
-            return Color(red: 0.45, green: 0.62, blue: 1.00)
-        case .live:
-            return Color(red: 0.35, green: 0.82, blue: 0.65)
-        case .stale:
-            return Color(red: 0.95, green: 0.70, blue: 0.28)
-        case .unavailable:
-            return DesignTokens.ColorToken.secondaryText
+    private var glassOverlay: some View {
+        RoundedRectangle(cornerRadius: DesignTokens.Radius.card, style: .continuous)
+            .fill(
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.12),
+                        Color.white.opacity(0.04),
+                        Color.black.opacity(0.05)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .allowsHitTesting(false)
+    }
+
+    private func triggerRingPulse() {
+        withAnimation(.easeOut(duration: 0.16)) {
+            ringPulse = true
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+            withAnimation(.easeOut(duration: 0.32)) {
+                ringPulse = false
+            }
         }
     }
 }
@@ -172,10 +313,7 @@ struct HUDView: View {
 #if DEBUG
 struct HUDView_Previews: PreviewProvider {
     static var previews: some View {
-        HUDView(
-            snapshot: MockTelemetryProvider.demoSnapshots[0],
-            advanceAction: {}
-        )
+        HUDView(viewModel: HUDViewModel())
     }
 }
 #endif

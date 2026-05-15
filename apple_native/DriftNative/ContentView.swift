@@ -1,15 +1,26 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var telemetryProvider = MockTelemetryProvider()
+    @StateObject private var viewModel = HUDViewModel()
 
     var body: some View {
-        HUDView(
-            snapshot: telemetryProvider.currentSnapshot,
-            advanceAction: telemetryProvider.advance
-        )
-        .frame(minWidth: 360, idealWidth: 420, maxWidth: 480)
-        .frame(minHeight: 500, idealHeight: 540, maxHeight: 620)
+        HUDView(viewModel: viewModel)
+            .frame(
+                minWidth: DesignTokens.Layout.hudMinWidth,
+                idealWidth: DesignTokens.Layout.hudIdealWidth,
+                maxWidth: DesignTokens.Layout.hudMaxWidth
+            )
+            .frame(
+                minHeight: DesignTokens.Layout.hudMinHeight,
+                idealHeight: DesignTokens.Layout.hudIdealHeight,
+                maxHeight: DesignTokens.Layout.hudMaxHeight
+            )
+            .onAppear {
+                viewModel.startMockCycle()
+            }
+            .onDisappear {
+                viewModel.stopMockCycle()
+            }
     }
 }
 

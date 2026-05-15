@@ -8,7 +8,7 @@ struct InterventionEngine {
     /// if there is no clear benefit, the best intervention is silence.
     func message(for state: AttentionState, context: AttentionContext) -> String {
         switch state {
-        case .focused, .assistedDeepWork, .developmentLoop:
+        case .focused, .assistedDeepWork, .developmentLoop, .researchFlow:
             return "No intervention needed."
         case .neutral:
             return "Quiet mode. Stay with what matters."

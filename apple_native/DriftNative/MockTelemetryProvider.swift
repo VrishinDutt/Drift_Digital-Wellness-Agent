@@ -1,11 +1,6 @@
-import Combine
 import Foundation
 
-final class MockTelemetryProvider: ObservableObject {
-    @Published private(set) var currentSnapshot: AttentionSnapshot
-
-    private var currentIndex: Int
-
+struct MockTelemetryProvider {
     static let demoSnapshots: [AttentionSnapshot] = [
         AttentionSnapshot(
             state: .focused,
@@ -21,16 +16,16 @@ final class MockTelemetryProvider: ObservableObject {
             context: .development,
             driftScore: 30,
             latestApp: "Terminal + ChatGPT",
-            latestTitle: "Development loop",
+            latestTitle: "Build, inspect, refine",
             telemetryStatus: .mocked,
-            interventionMessage: "Assisted work looks steady."
+            interventionMessage: "Assistance is supporting the work loop."
         ),
         AttentionSnapshot(
-            state: .focused,
+            state: .researchFlow,
             context: .research,
             driftScore: 25,
             latestApp: "Safari",
-            latestTitle: "StackExchange / GitHub",
+            latestTitle: "Technical reference",
             telemetryStatus: .mocked,
             interventionMessage: "Research flow looks clear."
         ),
@@ -47,7 +42,7 @@ final class MockTelemetryProvider: ObservableObject {
             state: .compulsiveDrift,
             context: .passiveConsumption,
             driftScore: 75,
-            latestApp: "YouTube / Reddit",
+            latestApp: "YouTube",
             latestTitle: "Passive feed loop",
             telemetryStatus: .mocked,
             interventionMessage: "Let the impulse settle briefly."
@@ -63,27 +58,45 @@ final class MockTelemetryProvider: ObservableObject {
         ),
         AttentionSnapshot(
             state: .idlePaused,
-            context: .unknown,
+            context: .paused,
             driftScore: 5,
-            latestApp: "No active interaction",
+            latestApp: "None",
             latestTitle: nil,
             telemetryStatus: .mocked,
             interventionMessage: "Quiet mode. Nothing needs attention."
         )
     ]
 
-    init(initialIndex: Int = 0) {
-        let safeIndex = Self.demoSnapshots.indices.contains(initialIndex) ? initialIndex : 0
-        self.currentIndex = safeIndex
-        self.currentSnapshot = Self.demoSnapshots[safeIndex].refreshed()
+    var count: Int {
+        Self.demoSnapshots.count
     }
 
-    func advance() {
-        currentIndex = (currentIndex + 1) % Self.demoSnapshots.count
-        currentSnapshot = Self.demoSnapshots[currentIndex].refreshed()
+    func normalizedIndex(_ index: Int) -> Int {
+        guard !Self.demoSnapshots.isEmpty else {
+            return 0
+        }
+
+        return Self.demoSnapshots.indices.contains(index) ? index : 0
+    }
+
+    func nextIndex(after index: Int) -> Int {
+        guard !Self.demoSnapshots.isEmpty else {
+            return 0
+        }
+
+        return (normalizedIndex(index) + 1) % Self.demoSnapshots.count
+    }
+
+    func snapshot(at index: Int) -> AttentionSnapshot {
+        Self.demoSnapshots[normalizedIndex(index)].refreshed()
     }
 }
 
+// Future native providers can layer in NSWorkspace foreground-app changes,
+// AppKit activation notifications, user-granted AXUIElement window metadata,
+// a menu bar agent, a floating HUD window, and local timeline storage. This
+// mock provider intentionally adds no screenshots, keystroke logging, clipboard
+// access, page scraping, message reading, or private screen capture.
 extension AttentionSnapshot {
     func refreshed(at date: Date = Date()) -> AttentionSnapshot {
         AttentionSnapshot(
