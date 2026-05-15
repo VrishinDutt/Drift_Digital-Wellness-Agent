@@ -1,0 +1,122 @@
+import Foundation
+
+struct AttentionSnapshot: Identifiable, Equatable {
+    let id: UUID
+    let state: AttentionState
+    let context: AttentionContext
+    let driftScore: Int
+    let latestApp: String
+    let latestTitle: String?
+    let telemetryStatus: TelemetryStatus
+    let interventionMessage: String
+    let lastUpdated: Date
+
+    init(
+        id: UUID = UUID(),
+        state: AttentionState,
+        context: AttentionContext,
+        driftScore: Int,
+        latestApp: String,
+        latestTitle: String? = nil,
+        telemetryStatus: TelemetryStatus,
+        interventionMessage: String,
+        lastUpdated: Date = Date()
+    ) {
+        self.id = id
+        self.state = state
+        self.context = context
+        self.driftScore = max(0, min(driftScore, 100))
+        self.latestApp = latestApp
+        self.latestTitle = latestTitle
+        self.telemetryStatus = telemetryStatus
+        self.interventionMessage = interventionMessage
+        self.lastUpdated = lastUpdated
+    }
+}
+
+enum AttentionState: String, CaseIterable, Equatable {
+    case focused
+    case assistedDeepWork
+    case developmentLoop
+    case neutral
+    case passiveDrift
+    case compulsiveDrift
+    case overloaded
+    case idlePaused
+    case unknown
+
+    var displayName: String {
+        switch self {
+        case .focused:
+            return "Focused"
+        case .assistedDeepWork:
+            return "Assisted Deep Work"
+        case .developmentLoop:
+            return "Development Loop"
+        case .neutral:
+            return "Neutral"
+        case .passiveDrift:
+            return "Passive Drift"
+        case .compulsiveDrift:
+            return "Compulsive Drift"
+        case .overloaded:
+            return "Overloaded"
+        case .idlePaused:
+            return "Idle / Paused"
+        case .unknown:
+            return "Unknown"
+        }
+    }
+}
+
+enum AttentionContext: String, CaseIterable, Equatable {
+    case deepWork
+    case assistedWork
+    case development
+    case research
+    case generalBrowsing
+    case passiveConsumption
+    case audioRegulation
+    case unknown
+
+    var displayName: String {
+        switch self {
+        case .deepWork:
+            return "Deep Work"
+        case .assistedWork:
+            return "Assisted Work"
+        case .development:
+            return "Development Loop"
+        case .research:
+            return "Research Flow"
+        case .generalBrowsing:
+            return "General Browsing"
+        case .passiveConsumption:
+            return "Passive Consumption"
+        case .audioRegulation:
+            return "Audio Regulation"
+        case .unknown:
+            return "Unknown Context"
+        }
+    }
+}
+
+enum TelemetryStatus: String, CaseIterable, Equatable {
+    case mocked
+    case live
+    case stale
+    case unavailable
+
+    var displayName: String {
+        switch self {
+        case .mocked:
+            return "Mocked"
+        case .live:
+            return "Live"
+        case .stale:
+            return "Stale"
+        case .unavailable:
+            return "Unavailable"
+        }
+    }
+}
