@@ -1,0 +1,3 @@
+-r requirements.txt
+pyobjc-framework-Quartz
+pyobjc-framework-Cocoa
