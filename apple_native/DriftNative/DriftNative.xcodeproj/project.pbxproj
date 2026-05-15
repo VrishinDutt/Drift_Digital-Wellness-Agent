@@ -1,0 +1,637 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		81BD57B82FB768A5003985C3 /* BehaviorEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57AE2FB768A5003985C3 /* BehaviorEngine.swift */; };
+		81BD57B92FB768A5003985C3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B12FB768A5003985C3 /* DesignTokens.swift */; };
+		81BD57BA2FB768A5003985C3 /* DriftAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B22FB768A5003985C3 /* DriftAnalyzer.swift */; };
+		81BD57BB2FB768A5003985C3 /* DriftNativeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B32FB768A5003985C3 /* DriftNativeApp.swift */; };
+		81BD57BC2FB768A5003985C3 /* InterventionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B52FB768A5003985C3 /* InterventionEngine.swift */; };
+		81BD57BD2FB768A5003985C3 /* HUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B42FB768A5003985C3 /* HUDView.swift */; };
+		81BD57BE2FB768A5003985C3 /* ContextClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B02FB768A5003985C3 /* ContextClassifier.swift */; };
+		81BD57BF2FB768A5003985C3 /* AttentionSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57AD2FB768A5003985C3 /* AttentionSnapshot.swift */; };
+		81BD57C02FB768A5003985C3 /* MockTelemetryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B62FB768A5003985C3 /* MockTelemetryProvider.swift */; };
+		81BD57C12FB768A5003985C3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57AF2FB768A5003985C3 /* ContentView.swift */; };
+		81BD57C22FB768A5003985C3 /* ReasoningEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B72FB768A5003985C3 /* ReasoningEngine.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		81E31E1A2FB761470091AE30 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81E31E022FB761450091AE30 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 81E31E092FB761450091AE30;
+			remoteInfo = DriftNative;
+		};
+		81E31E242FB761470091AE30 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81E31E022FB761450091AE30 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 81E31E092FB761450091AE30;
+			remoteInfo = DriftNative;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		81BD57AD2FB768A5003985C3 /* AttentionSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionSnapshot.swift; sourceTree = "<group>"; };
+		81BD57AE2FB768A5003985C3 /* BehaviorEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorEngine.swift; sourceTree = "<group>"; };
+		81BD57AF2FB768A5003985C3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		81BD57B02FB768A5003985C3 /* ContextClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextClassifier.swift; sourceTree = "<group>"; };
+		81BD57B12FB768A5003985C3 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		81BD57B22FB768A5003985C3 /* DriftAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftAnalyzer.swift; sourceTree = "<group>"; };
+		81BD57B32FB768A5003985C3 /* DriftNativeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftNativeApp.swift; sourceTree = "<group>"; };
+		81BD57B42FB768A5003985C3 /* HUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDView.swift; sourceTree = "<group>"; };
+		81BD57B52FB768A5003985C3 /* InterventionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterventionEngine.swift; sourceTree = "<group>"; };
+		81BD57B62FB768A5003985C3 /* MockTelemetryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTelemetryProvider.swift; sourceTree = "<group>"; };
+		81BD57B72FB768A5003985C3 /* ReasoningEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReasoningEngine.swift; sourceTree = "<group>"; };
+		81BD57C32FB768AA003985C3 /* DriftNative-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DriftNative-Bridging-Header.h"; sourceTree = "<group>"; };
+		81E31E0A2FB761450091AE30 /* DriftNative.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DriftNative.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		81E31E192FB761470091AE30 /* DriftNativeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DriftNativeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		81E31E232FB761470091AE30 /* DriftNativeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DriftNativeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		81E31E0C2FB761450091AE30 /* DriftNative */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DriftNative;
+			sourceTree = "<group>";
+		};
+		81E31E1C2FB761470091AE30 /* DriftNativeTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DriftNativeTests;
+			sourceTree = "<group>";
+		};
+		81E31E262FB761470091AE30 /* DriftNativeUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DriftNativeUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		81E31E072FB761450091AE30 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		81E31E162FB761470091AE30 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		81E31E202FB761470091AE30 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		81E31E012FB761450091AE30 = {
+			isa = PBXGroup;
+			children = (
+				81BD57AD2FB768A5003985C3 /* AttentionSnapshot.swift */,
+				81BD57AE2FB768A5003985C3 /* BehaviorEngine.swift */,
+				81BD57AF2FB768A5003985C3 /* ContentView.swift */,
+				81BD57B02FB768A5003985C3 /* ContextClassifier.swift */,
+				81BD57B12FB768A5003985C3 /* DesignTokens.swift */,
+				81BD57B22FB768A5003985C3 /* DriftAnalyzer.swift */,
+				81BD57B32FB768A5003985C3 /* DriftNativeApp.swift */,
+				81BD57B42FB768A5003985C3 /* HUDView.swift */,
+				81BD57B52FB768A5003985C3 /* InterventionEngine.swift */,
+				81BD57B62FB768A5003985C3 /* MockTelemetryProvider.swift */,
+				81BD57B72FB768A5003985C3 /* ReasoningEngine.swift */,
+				81E31E0C2FB761450091AE30 /* DriftNative */,
+				81E31E1C2FB761470091AE30 /* DriftNativeTests */,
+				81E31E262FB761470091AE30 /* DriftNativeUITests */,
+				81E31E0B2FB761450091AE30 /* Products */,
+				81BD57C32FB768AA003985C3 /* DriftNative-Bridging-Header.h */,
+			);
+			sourceTree = "<group>";
+		};
+		81E31E0B2FB761450091AE30 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				81E31E0A2FB761450091AE30 /* DriftNative.app */,
+				81E31E192FB761470091AE30 /* DriftNativeTests.xctest */,
+				81E31E232FB761470091AE30 /* DriftNativeUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		81E31E092FB761450091AE30 /* DriftNative */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 81E31E2D2FB761470091AE30 /* Build configuration list for PBXNativeTarget "DriftNative" */;
+			buildPhases = (
+				81E31E062FB761450091AE30 /* Sources */,
+				81E31E072FB761450091AE30 /* Frameworks */,
+				81E31E082FB761450091AE30 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				81E31E0C2FB761450091AE30 /* DriftNative */,
+			);
+			name = DriftNative;
+			packageProductDependencies = (
+			);
+			productName = DriftNative;
+			productReference = 81E31E0A2FB761450091AE30 /* DriftNative.app */;
+			productType = "com.apple.product-type.application";
+		};
+		81E31E182FB761470091AE30 /* DriftNativeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 81E31E302FB761470091AE30 /* Build configuration list for PBXNativeTarget "DriftNativeTests" */;
+			buildPhases = (
+				81E31E152FB761470091AE30 /* Sources */,
+				81E31E162FB761470091AE30 /* Frameworks */,
+				81E31E172FB761470091AE30 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				81E31E1B2FB761470091AE30 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				81E31E1C2FB761470091AE30 /* DriftNativeTests */,
+			);
+			name = DriftNativeTests;
+			packageProductDependencies = (
+			);
+			productName = DriftNativeTests;
+			productReference = 81E31E192FB761470091AE30 /* DriftNativeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		81E31E222FB761470091AE30 /* DriftNativeUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 81E31E332FB761470091AE30 /* Build configuration list for PBXNativeTarget "DriftNativeUITests" */;
+			buildPhases = (
+				81E31E1F2FB761470091AE30 /* Sources */,
+				81E31E202FB761470091AE30 /* Frameworks */,
+				81E31E212FB761470091AE30 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				81E31E252FB761470091AE30 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				81E31E262FB761470091AE30 /* DriftNativeUITests */,
+			);
+			name = DriftNativeUITests;
+			packageProductDependencies = (
+			);
+			productName = DriftNativeUITests;
+			productReference = 81E31E232FB761470091AE30 /* DriftNativeUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		81E31E022FB761450091AE30 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					81E31E092FB761450091AE30 = {
+						CreatedOnToolsVersion = 26.2;
+						LastSwiftMigration = 2620;
+					};
+					81E31E182FB761470091AE30 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 81E31E092FB761450091AE30;
+					};
+					81E31E222FB761470091AE30 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 81E31E092FB761450091AE30;
+					};
+				};
+			};
+			buildConfigurationList = 81E31E052FB761450091AE30 /* Build configuration list for PBXProject "DriftNative" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 81E31E012FB761450091AE30;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 81E31E0B2FB761450091AE30 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				81E31E092FB761450091AE30 /* DriftNative */,
+				81E31E182FB761470091AE30 /* DriftNativeTests */,
+				81E31E222FB761470091AE30 /* DriftNativeUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		81E31E082FB761450091AE30 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		81E31E172FB761470091AE30 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		81E31E212FB761470091AE30 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		81E31E062FB761450091AE30 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				81BD57B82FB768A5003985C3 /* BehaviorEngine.swift in Sources */,
+				81BD57B92FB768A5003985C3 /* DesignTokens.swift in Sources */,
+				81BD57BA2FB768A5003985C3 /* DriftAnalyzer.swift in Sources */,
+				81BD57BB2FB768A5003985C3 /* DriftNativeApp.swift in Sources */,
+				81BD57BC2FB768A5003985C3 /* InterventionEngine.swift in Sources */,
+				81BD57BD2FB768A5003985C3 /* HUDView.swift in Sources */,
+				81BD57BE2FB768A5003985C3 /* ContextClassifier.swift in Sources */,
+				81BD57BF2FB768A5003985C3 /* AttentionSnapshot.swift in Sources */,
+				81BD57C02FB768A5003985C3 /* MockTelemetryProvider.swift in Sources */,
+				81BD57C12FB768A5003985C3 /* ContentView.swift in Sources */,
+				81BD57C22FB768A5003985C3 /* ReasoningEngine.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		81E31E152FB761470091AE30 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		81E31E1F2FB761470091AE30 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		81E31E1B2FB761470091AE30 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 81E31E092FB761450091AE30 /* DriftNative */;
+			targetProxy = 81E31E1A2FB761470091AE30 /* PBXContainerItemProxy */;
+		};
+		81E31E252FB761470091AE30 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 81E31E092FB761450091AE30 /* DriftNative */;
+			targetProxy = 81E31E242FB761470091AE30 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		81E31E2B2FB761470091AE30 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 556Q49SR2D;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		81E31E2C2FB761470091AE30 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 556Q49SR2D;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		81E31E2E2FB761470091AE30 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 556Q49SR2D;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vrishindutt.DriftNative;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DriftNative-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		81E31E2F2FB761470091AE30 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 556Q49SR2D;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vrishindutt.DriftNative;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DriftNative-Bridging-Header.h";
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		81E31E312FB761470091AE30 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 556Q49SR2D;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vrishindutt.DriftNativeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DriftNative.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DriftNative";
+			};
+			name = Debug;
+		};
+		81E31E322FB761470091AE30 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 556Q49SR2D;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vrishindutt.DriftNativeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DriftNative.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DriftNative";
+			};
+			name = Release;
+		};
+		81E31E342FB761470091AE30 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 556Q49SR2D;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vrishindutt.DriftNativeUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = DriftNative;
+			};
+			name = Debug;
+		};
+		81E31E352FB761470091AE30 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 556Q49SR2D;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vrishindutt.DriftNativeUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = DriftNative;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		81E31E052FB761450091AE30 /* Build configuration list for PBXProject "DriftNative" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				81E31E2B2FB761470091AE30 /* Debug */,
+				81E31E2C2FB761470091AE30 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		81E31E2D2FB761470091AE30 /* Build configuration list for PBXNativeTarget "DriftNative" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				81E31E2E2FB761470091AE30 /* Debug */,
+				81E31E2F2FB761470091AE30 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		81E31E302FB761470091AE30 /* Build configuration list for PBXNativeTarget "DriftNativeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				81E31E312FB761470091AE30 /* Debug */,
+				81E31E322FB761470091AE30 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		81E31E332FB761470091AE30 /* Build configuration list for PBXNativeTarget "DriftNativeUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				81E31E342FB761470091AE30 /* Debug */,
+				81E31E352FB761470091AE30 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 81E31E022FB761450091AE30 /* Project object */;
+}

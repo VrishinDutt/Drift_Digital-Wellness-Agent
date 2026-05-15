@@ -18,3 +18,8 @@ data/*legacy*
 !data/.gitkeep
 
 *.log
+
+# Xcode user-specific state
+*.xcuserstate
+*.xcuserdata/
+xcuserdata/
