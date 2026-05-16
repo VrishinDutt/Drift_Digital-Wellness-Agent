@@ -36,6 +36,7 @@ final class HUDViewModel: ObservableObject {
     @Published private(set) var diagnosticEntries: [DriftLogEntry] = []
     @Published private(set) var soundscapePlaybackState: SoundscapePlaybackState = .idle
     @Published private(set) var currentSoundscapeMode: SoundscapeMode = .none
+    @Published private(set) var appleMusicAuthorizationState: AppleMusicAuthorizationState
 
     private static let mockCycleInterval: TimeInterval = 4
     private static let livePollingInterval: TimeInterval = 2.5
@@ -46,6 +47,7 @@ final class HUDViewModel: ObservableObject {
     private let nativeTelemetryProvider: NativeTelemetryProvider
     private let behaviorEngine: BehaviorEngine
     private let soundscapePlayer: LocalSoundscapePlayer
+    private let appleMusicProvider: AppleMusicProvider
     private let logger: DriftLogger
     private let maxSamples = 20
     private var currentIndex: Int
@@ -60,6 +62,7 @@ final class HUDViewModel: ObservableObject {
             nativeTelemetryProvider: NativeTelemetryProvider(),
             behaviorEngine: BehaviorEngine(),
             soundscapePlayer: LocalSoundscapePlayer(),
+            appleMusicProvider: AppleMusicProvider(),
             logger: DriftLogger(),
             initialIndex: initialIndex
         )
@@ -70,6 +73,7 @@ final class HUDViewModel: ObservableObject {
         nativeTelemetryProvider: NativeTelemetryProvider,
         behaviorEngine: BehaviorEngine,
         soundscapePlayer: LocalSoundscapePlayer,
+        appleMusicProvider: AppleMusicProvider,
         logger: DriftLogger,
         initialIndex: Int = 0
     ) {
@@ -77,7 +81,9 @@ final class HUDViewModel: ObservableObject {
         self.nativeTelemetryProvider = nativeTelemetryProvider
         self.behaviorEngine = behaviorEngine
         self.soundscapePlayer = soundscapePlayer
+        self.appleMusicProvider = appleMusicProvider
         self.logger = logger
+        self.appleMusicAuthorizationState = appleMusicProvider.currentAuthorizationState
         let safeIndex = mockTelemetryProvider.normalizedIndex(initialIndex)
         self.currentIndex = safeIndex
         self.snapshot = mockTelemetryProvider.snapshot(at: safeIndex)
@@ -158,6 +164,14 @@ final class HUDViewModel: ObservableObject {
 
     var soundscapePlaybackStatus: String {
         soundscapePlaybackState.displayName
+    }
+
+    var appleMusicAuthorizationStatus: String {
+        appleMusicAuthorizationState.displayName
+    }
+
+    var appleMusicCalmCopy: String? {
+        appleMusicAuthorizationState.calmCopy
     }
 
     var compactInterventionLine: String {
@@ -291,6 +305,12 @@ final class HUDViewModel: ObservableObject {
             soundscapePlayer.stop(),
             logMessage: "User stopped local cue"
         )
+    }
+
+    func requestAppleMusicAuthorization() async {
+        let state = await appleMusicProvider.requestAuthorization()
+        appleMusicAuthorizationState = state
+        log(.soundscape, "Apple Music authorization: \(state.displayName)")
     }
 
     deinit {

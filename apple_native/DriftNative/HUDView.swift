@@ -272,6 +272,10 @@ struct HUDView: View {
                     }
                 }
 
+                detailCard("Apple Music") {
+                    appleMusicDetail
+                }
+
                 detailCard("Intervention") {
                     interventionDetail
                 }
@@ -438,6 +442,30 @@ struct HUDView: View {
                 .font(DesignTokens.Typography.caption)
                 .foregroundStyle(DesignTokens.ColorToken.quietText)
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var appleMusicDetail: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+            detailRow("Apple Music", viewModel.appleMusicAuthorizationStatus)
+
+            if let calmCopy = viewModel.appleMusicCalmCopy {
+                Text(calmCopy)
+                    .font(DesignTokens.Typography.intervention)
+                    .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            capsuleButton(
+                "Enable Apple Music",
+                isDisabled: viewModel.appleMusicAuthorizationState == .authorized
+                    || viewModel.appleMusicAuthorizationState == .restricted
+                    || viewModel.appleMusicAuthorizationState == .unavailable
+            ) {
+                Task {
+                    await viewModel.requestAppleMusicAuthorization()
+                }
+            }
         }
     }
 
