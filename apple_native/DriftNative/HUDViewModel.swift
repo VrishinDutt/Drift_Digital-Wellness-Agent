@@ -34,6 +34,8 @@ final class HUDViewModel: ObservableObject {
     @Published private(set) var isBreathingResetActive = false
     @Published private(set) var breathingPhase: BreathingPhase = .inhale
     @Published private(set) var diagnosticEntries: [DriftLogEntry] = []
+    @Published private(set) var soundscapePlaybackState: SoundscapePlaybackState = .idle
+    @Published private(set) var currentSoundscapeMode: SoundscapeMode = .none
 
     private static let mockCycleInterval: TimeInterval = 4
     private static let livePollingInterval: TimeInterval = 2.5
@@ -43,6 +45,7 @@ final class HUDViewModel: ObservableObject {
     private let mockTelemetryProvider: MockTelemetryProvider
     private let nativeTelemetryProvider: NativeTelemetryProvider
     private let behaviorEngine: BehaviorEngine
+    private let soundscapePlayer: LocalSoundscapePlayer
     private let logger: DriftLogger
     private let maxSamples = 20
     private var currentIndex: Int
@@ -56,6 +59,7 @@ final class HUDViewModel: ObservableObject {
             mockTelemetryProvider: MockTelemetryProvider(),
             nativeTelemetryProvider: NativeTelemetryProvider(),
             behaviorEngine: BehaviorEngine(),
+            soundscapePlayer: LocalSoundscapePlayer(),
             logger: DriftLogger(),
             initialIndex: initialIndex
         )
@@ -65,12 +69,14 @@ final class HUDViewModel: ObservableObject {
         mockTelemetryProvider: MockTelemetryProvider,
         nativeTelemetryProvider: NativeTelemetryProvider,
         behaviorEngine: BehaviorEngine,
+        soundscapePlayer: LocalSoundscapePlayer,
         logger: DriftLogger,
         initialIndex: Int = 0
     ) {
         self.mockTelemetryProvider = mockTelemetryProvider
         self.nativeTelemetryProvider = nativeTelemetryProvider
         self.behaviorEngine = behaviorEngine
+        self.soundscapePlayer = soundscapePlayer
         self.logger = logger
         let safeIndex = mockTelemetryProvider.normalizedIndex(initialIndex)
         self.currentIndex = safeIndex
@@ -125,9 +131,33 @@ final class HUDViewModel: ObservableObject {
             return "Optional breathing cue."
         case .softPause:
             return "Soft pause available."
-        case .audioTransitionSuggestion:
-            return "Optional rhythm suggestion."
+        case .rhythmTransitionSuggestion:
+            return "Optional \(snapshot.rhythmPlan.displayName)."
         }
+    }
+
+    var rhythmStatus: String {
+        if snapshot.rhythmPlan.shouldSurface {
+            return snapshot.rhythmPlan.interventionMessage
+        }
+
+        return snapshot.rhythmPlan.guidance
+    }
+
+    var hasSoundscapeSuggestion: Bool {
+        snapshot.rhythmPlan.hasSoundscapeSuggestion
+    }
+
+    var suggestedSoundscapeMode: SoundscapeMode {
+        snapshot.rhythmPlan.soundscapeMode
+    }
+
+    var suggestedSoundscapeAssetName: String {
+        suggestedSoundscapeMode.defaultLocalAssetName ?? "No local asset"
+    }
+
+    var soundscapePlaybackStatus: String {
+        soundscapePlaybackState.displayName
     }
 
     var compactInterventionLine: String {
@@ -198,6 +228,7 @@ final class HUDViewModel: ObservableObject {
         stopMockCycle()
         stopLiveTelemetry()
         dismissBreathingReset()
+        stopSoundscape()
     }
 
     func selectInterventionChoice(_ choice: String) {
@@ -235,6 +266,31 @@ final class HUDViewModel: ObservableObject {
         isBreathingResetActive = false
         breathingPhase = .inhale
         breathingStepsRemaining = 0
+    }
+
+    func playSuggestedSoundscape() {
+        guard hasSoundscapeSuggestion else {
+            return
+        }
+
+        applySoundscapeState(
+            soundscapePlayer.play(suggestedSoundscapeMode),
+            logMessage: "User started local cue: \(suggestedSoundscapeMode.displayName)"
+        )
+    }
+
+    func pauseSoundscape() {
+        applySoundscapeState(
+            soundscapePlayer.pause(),
+            logMessage: "User paused local cue"
+        )
+    }
+
+    func stopSoundscape() {
+        applySoundscapeState(
+            soundscapePlayer.stop(),
+            logMessage: "User stopped local cue"
+        )
     }
 
     deinit {
@@ -321,11 +377,16 @@ final class HUDViewModel: ObservableObject {
 
     private func applySnapshot(_ newSnapshot: AttentionSnapshot) {
         let previousIntervention = snapshot.intervention
+        let previousRhythmPlan = snapshot.rhythmPlan
         snapshot = newSnapshot
         log(
             .snapshot,
             "Snapshot updated: \(newSnapshot.state.displayName), drift \(newSnapshot.driftScore)"
         )
+
+        if newSnapshot.rhythmPlan != previousRhythmPlan {
+            log(.rhythm, "Rhythm cue: \(newSnapshot.rhythmPlan.displayName)")
+        }
 
         if newSnapshot.intervention != previousIntervention {
             resetInterventionUI()
@@ -335,6 +396,27 @@ final class HUDViewModel: ObservableObject {
     private func resetInterventionUI() {
         selectedIntention = nil
         dismissBreathingReset()
+    }
+
+    private func applySoundscapeState(
+        _ state: SoundscapePlaybackState,
+        logMessage: String
+    ) {
+        soundscapePlaybackState = state
+        currentSoundscapeMode = soundscapePlayer.currentMode
+
+        switch state {
+        case .idle:
+            log(.soundscape, logMessage)
+        case .playing:
+            log(.soundscape, logMessage)
+        case .paused:
+            log(.soundscape, logMessage)
+        case .unavailable:
+            log(.soundscape, "Soundscape asset unavailable: \(suggestedSoundscapeAssetName)")
+        case .failed(_, let message):
+            log(.soundscape, message)
+        }
     }
 
     private func advanceBreathingCue() {

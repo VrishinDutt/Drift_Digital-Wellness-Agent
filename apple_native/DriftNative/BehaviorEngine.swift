@@ -26,6 +26,7 @@ struct BehaviorEngine {
     var contextClassifier = ContextClassifier()
     var driftAnalyzer = DriftAnalyzer()
     var reasoningEngine = ReasoningEngine()
+    var cognitiveRhythmLayer = CognitiveRhythmLayer()
     var interventionEngine = InterventionEngine()
 
     /// Native counterpart to the Python behavior engine.
@@ -61,9 +62,17 @@ struct BehaviorEngine {
             isIdle: latest.isIdle
         )
 
+        let rhythmPlan = cognitiveRhythmLayer.plan(
+            for: state,
+            context: context,
+            driftScore: driftScore,
+            date: latest.timestamp
+        )
+
         let intervention = interventionEngine.intervention(
             for: state,
-            context: context
+            context: context,
+            rhythmPlan: rhythmPlan
         )
 
         return AttentionSnapshot(
@@ -73,6 +82,7 @@ struct BehaviorEngine {
             latestApp: latest.appName,
             latestTitle: latest.windowTitle,
             telemetryStatus: telemetryStatus,
+            rhythmPlan: rhythmPlan,
             intervention: intervention,
             lastUpdated: Date()
         )

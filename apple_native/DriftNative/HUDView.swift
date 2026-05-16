@@ -157,9 +157,10 @@ struct HUDView: View {
             }
         }
         .frame(width: DesignTokens.Layout.ringSize, height: DesignTokens.Layout.ringSize)
+        .contentShape(Circle())
         .scaleEffect(ringPulse ? 1.025 : 1)
         .animation(.easeOut(duration: 0.24), value: ringPulse)
-        .hudHoverLift(accent: accent, scale: 1.03)
+        .hudCircularHoverGlow(accent: accent)
         .accessibilityLabel("Drift score \(snapshot.driftScore)")
     }
 
@@ -263,6 +264,12 @@ struct HUDView: View {
                         .font(DesignTokens.Typography.intervention)
                         .foregroundStyle(DesignTokens.ColorToken.primaryText)
                         .fixedSize(horizontal: false, vertical: true)
+                }
+
+                if viewModel.hasSoundscapeSuggestion {
+                    detailCard("Rhythm") {
+                        rhythmDetail
+                    }
                 }
 
                 detailCard("Intervention") {
@@ -380,6 +387,75 @@ struct HUDView: View {
         }
     }
 
+    private var rhythmDetail: some View {
+        let plan = snapshot.rhythmPlan
+
+        return VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+            HStack(spacing: DesignTokens.Spacing.xs) {
+                rhythmChip(plan.displayName)
+                rhythmChip(plan.intensity.displayName)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Suggested rhythm")
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(DesignTokens.ColorToken.quietText)
+
+                Text(viewModel.suggestedSoundscapeMode.displayName)
+                    .font(DesignTokens.Typography.metric)
+                    .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                detailRow("Feel", plan.texture.displayName)
+                detailRow("Pace", plan.cadence)
+                detailRow("Asset", viewModel.suggestedSoundscapeAssetName)
+            }
+
+            Text(viewModel.rhythmStatus)
+                .font(DesignTokens.Typography.intervention)
+                .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: DesignTokens.Spacing.xs) {
+                capsuleButton("Play local cue") {
+                    viewModel.playSuggestedSoundscape()
+                }
+
+                capsuleButton("Stop", isDisabled: !viewModel.soundscapePlaybackState.isActive) {
+                    viewModel.stopSoundscape()
+                }
+            }
+
+            Text(viewModel.soundscapePlaybackStatus)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(plan.boundary)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func rhythmChip(_ value: String) -> some View {
+        Text(value)
+            .font(DesignTokens.Typography.caption)
+            .foregroundStyle(accent)
+            .lineLimit(1)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(accent.opacity(0.10))
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(accent.opacity(0.22), lineWidth: 1)
+            )
+    }
+
     private var breathingResetControl: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
             if viewModel.isBreathingResetActive {
@@ -432,6 +508,7 @@ struct HUDView: View {
 
     private func capsuleButton(
         _ title: String,
+        isDisabled: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -446,8 +523,10 @@ struct HUDView: View {
                     Capsule()
                         .stroke(accent.opacity(0.22), lineWidth: 1)
                 )
+                .opacity(isDisabled ? 0.46 : 1)
         }
         .buttonStyle(.plain)
+        .disabled(isDisabled)
         .hudHoverLift(accent: accent, scale: 1.035)
     }
 
@@ -639,9 +718,37 @@ private struct HoverLiftModifier: ViewModifier {
     }
 }
 
+private struct CircularHoverGlowModifier: ViewModifier {
+    let accent: Color
+    @State private var isHovered = false
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                Circle()
+                    .strokeBorder(isHovered ? accent.opacity(0.28) : .clear, lineWidth: 1)
+                    .allowsHitTesting(false)
+            )
+            .shadow(
+                color: isHovered ? accent.opacity(0.18) : .clear,
+                radius: isHovered ? 10 : 0,
+                x: 0,
+                y: 0
+            )
+            .animation(.easeOut(duration: 0.16), value: isHovered)
+            .onHover { hovering in
+                isHovered = hovering
+            }
+    }
+}
+
 private extension View {
     func hudHoverLift(accent: Color, scale: CGFloat = 1.02) -> some View {
         modifier(HoverLiftModifier(accent: accent, scale: scale))
+    }
+
+    func hudCircularHoverGlow(accent: Color) -> some View {
+        modifier(CircularHoverGlowModifier(accent: accent))
     }
 }
 

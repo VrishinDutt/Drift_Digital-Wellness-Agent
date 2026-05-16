@@ -5,7 +5,7 @@ enum InterventionKind: String, CaseIterable, Equatable {
     case reflectivePrompt
     case breathingReset
     case softPause
-    case audioTransitionSuggestion
+    case rhythmTransitionSuggestion
 }
 
 struct AttentionIntervention: Equatable {
@@ -37,14 +37,14 @@ struct InterventionEngine {
     /// prevention, and user override. The intervention layer should stay sparse:
     /// if there is no clear benefit, the best intervention is silence.
     ///
-    /// Future Cognitive Rhythm Layer / Adaptive Soundscape-inspired support can
-    /// remain local and user-controlled: Deep Work Rhythm, Downshift Rhythm,
-    /// Rising Energy Rhythm, Sunset / Wind-down Mode, Sunrise / Start-up Mode,
-    /// and visual Breathing Cue. Do not add audio playback, microphone input,
-    /// listening-history access, cloud generation, or mental-health inference.
+    /// Cognitive Rhythm Layer support remains local and user-controlled. It may
+    /// surface soundscape-inspired copy, but must not add audio playback,
+    /// microphone input, listening-history access, cloud generation, or
+    /// mental-health inference.
     func intervention(
         for state: AttentionState,
-        context: AttentionContext
+        context: AttentionContext,
+        rhythmPlan: CognitiveRhythmPlan = .none
     ) -> AttentionIntervention {
         switch state {
         case .focused, .assistedDeepWork, .developmentLoop, .researchFlow, .idlePaused:
@@ -52,6 +52,17 @@ struct InterventionEngine {
         case .neutral:
             return .none
         case .passiveDrift:
+            if rhythmPlan.shouldSurface {
+                return AttentionIntervention(
+                    kind: .rhythmTransitionSuggestion,
+                    title: rhythmPlan.displayName,
+                    message: rhythmPlan.interventionMessage,
+                    choices: ["Lower stimulation", "Choose next step"],
+                    tone: "rhythm",
+                    shouldExpandWidget: false
+                )
+            }
+
             return AttentionIntervention(
                 kind: .reflectivePrompt,
                 title: "Set a light intention",
@@ -63,8 +74,10 @@ struct InterventionEngine {
         case .compulsiveDrift:
             return AttentionIntervention(
                 kind: .softPause,
-                title: "Let the impulse settle",
-                message: "Pause briefly, then continue if it still feels intentional.",
+                title: rhythmPlan.shouldSurface ? rhythmPlan.displayName : "Let the impulse settle",
+                message: rhythmPlan.shouldSurface
+                    ? rhythmPlan.interventionMessage
+                    : "Pause briefly, then continue if it still feels intentional.",
                 choices: [],
                 tone: "soft-pause",
                 shouldExpandWidget: false
@@ -72,8 +85,10 @@ struct InterventionEngine {
         case .overloaded:
             return AttentionIntervention(
                 kind: .breathingReset,
-                title: "Slow the rhythm",
-                message: "Take one steady breath before continuing.",
+                title: rhythmPlan.shouldSurface ? rhythmPlan.displayName : "Slow the rhythm",
+                message: rhythmPlan.shouldSurface
+                    ? rhythmPlan.interventionMessage
+                    : "Take one steady breath before continuing.",
                 choices: [],
                 tone: "reset",
                 shouldExpandWidget: false

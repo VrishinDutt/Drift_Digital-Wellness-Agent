@@ -3,6 +3,7 @@ import Foundation
 struct MockTelemetryProvider {
     static let demoSnapshots: [AttentionSnapshot] = {
         let interventionEngine = InterventionEngine()
+        let cognitiveRhythmLayer = CognitiveRhythmLayer()
 
         func snapshot(
             state: AttentionState,
@@ -11,14 +12,25 @@ struct MockTelemetryProvider {
             latestApp: String,
             latestTitle: String? = nil
         ) -> AttentionSnapshot {
-            AttentionSnapshot(
+            let rhythmPlan = cognitiveRhythmLayer.plan(
+                for: state,
+                context: context,
+                driftScore: driftScore
+            )
+
+            return AttentionSnapshot(
                 state: state,
                 context: context,
                 driftScore: driftScore,
                 latestApp: latestApp,
                 latestTitle: latestTitle,
                 telemetryStatus: .mocked,
-                intervention: interventionEngine.intervention(for: state, context: context)
+                rhythmPlan: rhythmPlan,
+                intervention: interventionEngine.intervention(
+                    for: state,
+                    context: context,
+                    rhythmPlan: rhythmPlan
+                )
             )
         }
 
@@ -113,6 +125,7 @@ extension AttentionSnapshot {
             latestApp: latestApp,
             latestTitle: latestTitle,
             telemetryStatus: telemetryStatus,
+            rhythmPlan: rhythmPlan,
             intervention: intervention,
             lastUpdated: date
         )

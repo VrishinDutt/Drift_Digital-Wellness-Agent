@@ -8,6 +8,7 @@ struct AttentionSnapshot: Identifiable, Equatable {
     let latestApp: String
     let latestTitle: String?
     let telemetryStatus: TelemetryStatus
+    let rhythmPlan: CognitiveRhythmPlan
     let intervention: AttentionIntervention
     let lastUpdated: Date
 
@@ -23,6 +24,7 @@ struct AttentionSnapshot: Identifiable, Equatable {
         latestApp: String,
         latestTitle: String? = nil,
         telemetryStatus: TelemetryStatus,
+        rhythmPlan: CognitiveRhythmPlan = .none,
         intervention: AttentionIntervention? = nil,
         interventionMessage: String? = nil,
         lastUpdated: Date = Date()
@@ -34,6 +36,7 @@ struct AttentionSnapshot: Identifiable, Equatable {
         self.latestApp = latestApp
         self.latestTitle = latestTitle
         self.telemetryStatus = telemetryStatus
+        self.rhythmPlan = rhythmPlan
         self.intervention = intervention ?? AttentionIntervention(
             kind: .none,
             title: "No intervention needed",
