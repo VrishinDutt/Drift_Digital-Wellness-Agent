@@ -423,13 +423,26 @@ struct HUDView: View {
                 .foregroundStyle(DesignTokens.ColorToken.primaryText)
                 .fixedSize(horizontal: false, vertical: true)
 
-            HStack(spacing: DesignTokens.Spacing.xs) {
-                capsuleButton("Play local cue") {
-                    viewModel.playSuggestedSoundscape()
+            if let availabilityMessage = viewModel.suggestedSoundscapeAvailabilityMessage {
+                Text(availabilityMessage)
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                HStack(spacing: DesignTokens.Spacing.xs) {
+                    capsuleButton("Play local cue", isDisabled: !viewModel.isSuggestedSoundscapeAvailable) {
+                        viewModel.playSuggestedSoundscape()
+                    }
+
+                    capsuleButton("Stop", isDisabled: !viewModel.soundscapePlaybackState.isActive) {
+                        viewModel.stopSoundscape()
+                    }
                 }
 
-                capsuleButton("Stop", isDisabled: !viewModel.soundscapePlaybackState.isActive) {
-                    viewModel.stopSoundscape()
+                capsuleButton("Test breathing cue") {
+                    viewModel.playBreathingCue()
                 }
             }
 

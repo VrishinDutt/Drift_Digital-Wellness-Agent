@@ -15,14 +15,16 @@ from pathlib import Path
 
 
 SAMPLE_RATE = 8_000
-DURATION_SECONDS = 1.6
-FREQUENCY_HZ = 220.0
-MAX_AMPLITUDE = 0.16
+DURATION_SECONDS = 4.0
+FREQUENCY_HZ = 330.0
+MAX_AMPLITUDE = 0.32
 
 
 def breathing_envelope(position: float) -> float:
-    """Soft in/out pulse between 0 and 1."""
-    return math.sin(math.pi * position) ** 2
+    """Soft pulsing fade between 0 and 1."""
+    fade = math.sin(math.pi * position) ** 0.5
+    pulse = 0.55 + 0.45 * (math.sin(2 * math.pi * 0.5 * DURATION_SECONDS * position) ** 2)
+    return fade * pulse
 
 
 def generate_breathing_cue(output_path: Path) -> None:
@@ -49,4 +51,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

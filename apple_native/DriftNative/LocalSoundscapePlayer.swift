@@ -17,7 +17,7 @@ enum SoundscapePlaybackState: Equatable {
         case .paused(let mode):
             return "\(mode.displayName) is paused."
         case .unavailable:
-            return "Soundscape asset unavailable."
+            return "Local cue unavailable for this rhythm."
         case .failed(_, let message):
             return message
         }
@@ -36,6 +36,7 @@ enum SoundscapePlaybackState: Equatable {
 @MainActor
 final class LocalSoundscapePlayer {
     private static let assetSubdirectory = "SoundscapeAssets"
+    private static let playbackVolume: Float = 0.85
 
     private(set) var currentMode: SoundscapeMode = .none
     private(set) var state: SoundscapePlaybackState = .idle
@@ -55,35 +56,71 @@ final class LocalSoundscapePlayer {
     /// redistribution rights, or original. Local-only playback comes before any
     /// broader integration.
     @discardableResult
-    func play(_ mode: SoundscapeMode) -> SoundscapePlaybackState {
+    func play(_ mode: SoundscapeMode, logger: DriftLogger? = nil) -> SoundscapePlaybackState {
+        log(logger, "Requested soundscape mode: \(mode.displayName)")
+
         guard mode != .none, let assetName = mode.defaultLocalAssetName else {
-            return stop()
+            log(logger, "Resolved asset name: none")
+            let stoppedState = stop()
+            log(logger, "Playback state: \(stoppedState.displayName)")
+            return stoppedState
         }
+
+        log(logger, "Resolved asset name: \(assetName)")
 
         guard let assetURL = bundledAssetURL(for: assetName) else {
             player?.stop()
             player = nil
             currentMode = mode
             state = .unavailable(mode)
+            log(logger, "Bundle URL missing for asset: \(assetName)")
+            log(logger, "Playback state: \(state.displayName)")
             return state
         }
 
+        log(logger, "Bundle URL found: \(assetURL.lastPathComponent)")
+
         do {
             let localPlayer = try AVAudioPlayer(contentsOf: assetURL)
+            localPlayer.volume = Self.playbackVolume
             localPlayer.numberOfLoops = mode.allowsLooping ? -1 : 0
-            localPlayer.prepareToPlay()
-            localPlayer.play()
-
+            localPlayer.currentTime = 0
             player = localPlayer
             currentMode = mode
-            state = .playing(mode)
+
+            log(logger, "Player duration: \(formattedDuration(localPlayer.duration)) seconds")
+
+            localPlayer.prepareToPlay()
+            let didStartPlaying = localPlayer.play()
+
+            log(logger, "play() returned \(didStartPlaying)")
+
+            if didStartPlaying {
+                state = .playing(mode)
+            } else {
+                localPlayer.stop()
+                player = nil
+                state = .failed(mode, "Local cue failed to play.")
+            }
+
+            log(logger, "Playback state: \(state.displayName)")
             return state
         } catch {
             player = nil
             currentMode = mode
-            state = .failed(mode, "Soundscape asset unavailable.")
+            state = .failed(mode, "Local cue failed to play.")
+            log(logger, "Player creation failed: \(error.localizedDescription)")
+            log(logger, "Playback state: \(state.displayName)")
             return state
         }
+    }
+
+    func isAssetAvailable(for mode: SoundscapeMode) -> Bool {
+        guard mode != .none, let assetName = mode.defaultLocalAssetName else {
+            return false
+        }
+
+        return bundledAssetURL(for: assetName) != nil
     }
 
     @discardableResult
@@ -132,5 +169,13 @@ final class LocalSoundscapePlayer {
                 withExtension: fileExtension,
                 subdirectory: Self.assetSubdirectory
             )
+    }
+
+    private func formattedDuration(_ duration: TimeInterval) -> String {
+        String(format: "%.2f", duration)
+    }
+
+    private func log(_ logger: DriftLogger?, _ message: String) {
+        logger?.log(.soundscape, message)
     }
 }

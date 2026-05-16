@@ -162,6 +162,22 @@ final class HUDViewModel: ObservableObject {
         suggestedSoundscapeMode.defaultLocalAssetName ?? "No local asset"
     }
 
+    var isSuggestedSoundscapeAvailable: Bool {
+        guard hasSoundscapeSuggestion else {
+            return false
+        }
+
+        return soundscapePlayer.isAssetAvailable(for: suggestedSoundscapeMode)
+    }
+
+    var suggestedSoundscapeAvailabilityMessage: String? {
+        guard hasSoundscapeSuggestion, !isSuggestedSoundscapeAvailable else {
+            return nil
+        }
+
+        return "Local cue unavailable for this rhythm."
+    }
+
     var soundscapePlaybackStatus: String {
         soundscapePlaybackState.displayName
     }
@@ -288,8 +304,15 @@ final class HUDViewModel: ObservableObject {
         }
 
         applySoundscapeState(
-            soundscapePlayer.play(suggestedSoundscapeMode),
+            soundscapePlayer.play(suggestedSoundscapeMode, logger: logger),
             logMessage: "User started local cue: \(suggestedSoundscapeMode.displayName)"
+        )
+    }
+
+    func playBreathingCue() {
+        applySoundscapeState(
+            soundscapePlayer.play(.breathingCue, logger: logger),
+            logMessage: "User tested local breathing cue"
         )
     }
 
@@ -432,10 +455,10 @@ final class HUDViewModel: ObservableObject {
             log(.soundscape, logMessage)
         case .paused:
             log(.soundscape, logMessage)
-        case .unavailable:
-            log(.soundscape, "Soundscape asset unavailable: \(suggestedSoundscapeAssetName)")
-        case .failed(_, let message):
-            log(.soundscape, message)
+        case .unavailable(let mode):
+            log(.soundscape, "Soundscape asset unavailable: \(mode.defaultLocalAssetName ?? "No local asset")")
+        case .failed(let mode, let message):
+            log(.soundscape, "\(mode.displayName): \(message)")
         }
     }
 
