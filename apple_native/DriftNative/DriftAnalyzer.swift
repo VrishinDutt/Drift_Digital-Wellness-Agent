@@ -8,6 +8,12 @@ struct DriftAnalyzer {
     /// loop, while YouTube -> Reddit -> short-form feeds can indicate passive or
     /// compulsive drift. Context quality and repetition matter more than raw
     /// transition count.
+    ///
+    /// HUDViewModel owns the bounded sample buffer. This analyzer only works on
+    /// that recent slice, then narrows again to a small suffix for interpretable
+    /// features. Keep the score simple, deterministic, and legible. Avoid
+    /// overfitting app names, and never label intentional work loops as pathology
+    /// just because they involve switching between tools.
     func score(samples: [TelemetrySample], context: AttentionContext) -> Int {
         guard let latest = samples.last else {
             return 0
@@ -17,20 +23,7 @@ struct DriftAnalyzer {
             return 5
         }
 
-        let recent = Array(samples.suffix(8))
-        let appSwitches = zip(recent, recent.dropFirst()).filter { previous, current in
-            previous.appName.caseInsensitiveCompare(current.appName) != .orderedSame
-        }.count
-        let passiveRepeats = recent.filter { sample in
-            let app = sample.appName.lowercased()
-            let title = sample.windowTitle?.lowercased() ?? ""
-            return app.contains("youtube")
-                || app.contains("reddit")
-                || app.contains("instagram")
-                || title.contains("shorts")
-                || title.contains("reels")
-                || title.contains("feed")
-        }.count
+        let features = DriftFeatureSnapshot(samples: Array(samples.suffix(8)))
 
         var baseScore: Int
         switch context {
@@ -46,10 +39,18 @@ struct DriftAnalyzer {
             baseScore = 45
         }
 
-        baseScore += appSwitches * transitionWeight(for: context)
-        baseScore += passiveRepeats * 6
+        baseScore += features.transitionCount * transitionWeight(for: context)
+        baseScore += features.passiveHintCount * 6
 
-        if isProductive(context) {
+        if features.isWorkLoop {
+            baseScore = min(baseScore, 35)
+        }
+
+        if features.repeatedAppCount >= 5 && context == .unknown {
+            baseScore += 6
+        }
+
+        if isWorkAligned(context) {
             return min(baseScore, 45)
         }
 
@@ -75,12 +76,59 @@ struct DriftAnalyzer {
         }
     }
 
-    private func isProductive(_ context: AttentionContext) -> Bool {
+    private func isWorkAligned(_ context: AttentionContext) -> Bool {
         switch context {
         case .deepWork, .development, .assistedWork, .research:
             return true
         case .audioRegulation, .paused, .generalBrowsing, .passiveConsumption, .unknown:
             return false
         }
+    }
+}
+
+private struct DriftFeatureSnapshot {
+    let samples: [TelemetrySample]
+
+    var latestApp: String {
+        samples.last?.appName ?? "Unknown"
+    }
+
+    var transitionCount: Int {
+        zip(samples, samples.dropFirst()).filter { previous, current in
+            previous.appName.caseInsensitiveCompare(current.appName) != .orderedSame
+        }.count
+    }
+
+    var repeatedAppCount: Int {
+        guard let latest = samples.last else {
+            return 0
+        }
+
+        return samples.filter { sample in
+            sample.appName.caseInsensitiveCompare(latest.appName) == .orderedSame
+        }.count
+    }
+
+    var passiveHintCount: Int {
+        samples.filter { sample in
+            let app = sample.appName.lowercased()
+            let title = sample.windowTitle?.lowercased() ?? ""
+            return app.contains("youtube")
+                || app.contains("reddit")
+                || app.contains("instagram")
+                || title.contains("shorts")
+                || title.contains("reels")
+                || title.contains("feed")
+        }.count
+    }
+
+    var isWorkLoop: Bool {
+        let workApps = ["xcode", "terminal", "iterm", "chatgpt", "codex", "github", "visual studio code", "vscode"]
+        let appNames = Set(samples.map { $0.appName.lowercased() })
+        let workMatches = appNames.filter { app in
+            workApps.contains { app.contains($0) }
+        }
+
+        return transitionCount > 0 && !workMatches.isEmpty && workMatches.count == appNames.count
     }
 }

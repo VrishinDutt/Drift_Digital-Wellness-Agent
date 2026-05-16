@@ -8,8 +8,12 @@ struct AttentionSnapshot: Identifiable, Equatable {
     let latestApp: String
     let latestTitle: String?
     let telemetryStatus: TelemetryStatus
-    let interventionMessage: String
+    let intervention: AttentionIntervention
     let lastUpdated: Date
+
+    var interventionMessage: String {
+        intervention.message
+    }
 
     init(
         id: UUID = UUID(),
@@ -19,7 +23,8 @@ struct AttentionSnapshot: Identifiable, Equatable {
         latestApp: String,
         latestTitle: String? = nil,
         telemetryStatus: TelemetryStatus,
-        interventionMessage: String,
+        intervention: AttentionIntervention? = nil,
+        interventionMessage: String? = nil,
         lastUpdated: Date = Date()
     ) {
         self.id = id
@@ -29,7 +34,14 @@ struct AttentionSnapshot: Identifiable, Equatable {
         self.latestApp = latestApp
         self.latestTitle = latestTitle
         self.telemetryStatus = telemetryStatus
-        self.interventionMessage = interventionMessage
+        self.intervention = intervention ?? AttentionIntervention(
+            kind: .none,
+            title: "No intervention needed",
+            message: interventionMessage ?? AttentionIntervention.none.message,
+            choices: [],
+            tone: "quiet",
+            shouldExpandWidget: false
+        )
         self.lastUpdated = lastUpdated
     }
 }

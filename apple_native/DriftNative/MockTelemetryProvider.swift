@@ -1,71 +1,77 @@
 import Foundation
 
 struct MockTelemetryProvider {
-    static let demoSnapshots: [AttentionSnapshot] = [
-        AttentionSnapshot(
-            state: .focused,
-            context: .deepWork,
-            driftScore: 15,
-            latestApp: "Xcode",
-            latestTitle: "DriftNative",
-            telemetryStatus: .mocked,
-            interventionMessage: "No intervention needed."
-        ),
-        AttentionSnapshot(
-            state: .assistedDeepWork,
-            context: .development,
-            driftScore: 30,
-            latestApp: "Terminal + ChatGPT",
-            latestTitle: "Build, inspect, refine",
-            telemetryStatus: .mocked,
-            interventionMessage: "Assistance is supporting the work loop."
-        ),
-        AttentionSnapshot(
-            state: .researchFlow,
-            context: .research,
-            driftScore: 25,
-            latestApp: "Safari",
-            latestTitle: "Technical reference",
-            telemetryStatus: .mocked,
-            interventionMessage: "Research flow looks clear."
-        ),
-        AttentionSnapshot(
-            state: .passiveDrift,
-            context: .generalBrowsing,
-            driftScore: 45,
-            latestApp: "Safari",
-            latestTitle: "General browsing",
-            telemetryStatus: .mocked,
-            interventionMessage: "Slow the transition for a moment."
-        ),
-        AttentionSnapshot(
-            state: .compulsiveDrift,
-            context: .passiveConsumption,
-            driftScore: 75,
-            latestApp: "YouTube",
-            latestTitle: "Passive feed loop",
-            telemetryStatus: .mocked,
-            interventionMessage: "Let the impulse settle briefly."
-        ),
-        AttentionSnapshot(
-            state: .overloaded,
-            context: .unknown,
-            driftScore: 90,
-            latestApp: "Rapid switching",
-            latestTitle: nil,
-            telemetryStatus: .mocked,
-            interventionMessage: "A short reset may help restore clarity."
-        ),
-        AttentionSnapshot(
-            state: .idlePaused,
-            context: .paused,
-            driftScore: 5,
-            latestApp: "None",
-            latestTitle: nil,
-            telemetryStatus: .mocked,
-            interventionMessage: "Quiet mode. Nothing needs attention."
-        )
-    ]
+    static let demoSnapshots: [AttentionSnapshot] = {
+        let interventionEngine = InterventionEngine()
+
+        func snapshot(
+            state: AttentionState,
+            context: AttentionContext,
+            driftScore: Int,
+            latestApp: String,
+            latestTitle: String? = nil
+        ) -> AttentionSnapshot {
+            AttentionSnapshot(
+                state: state,
+                context: context,
+                driftScore: driftScore,
+                latestApp: latestApp,
+                latestTitle: latestTitle,
+                telemetryStatus: .mocked,
+                intervention: interventionEngine.intervention(for: state, context: context)
+            )
+        }
+
+        return [
+            snapshot(
+                state: .focused,
+                context: .deepWork,
+                driftScore: 15,
+                latestApp: "Xcode",
+                latestTitle: "DriftNative"
+            ),
+            snapshot(
+                state: .assistedDeepWork,
+                context: .development,
+                driftScore: 30,
+                latestApp: "Terminal + ChatGPT",
+                latestTitle: "Build, inspect, refine"
+            ),
+            snapshot(
+                state: .researchFlow,
+                context: .research,
+                driftScore: 25,
+                latestApp: "Safari",
+                latestTitle: "Technical reference"
+            ),
+            snapshot(
+                state: .passiveDrift,
+                context: .generalBrowsing,
+                driftScore: 45,
+                latestApp: "Safari",
+                latestTitle: "General browsing"
+            ),
+            snapshot(
+                state: .compulsiveDrift,
+                context: .passiveConsumption,
+                driftScore: 75,
+                latestApp: "YouTube",
+                latestTitle: "Passive feed loop"
+            ),
+            snapshot(
+                state: .overloaded,
+                context: .unknown,
+                driftScore: 90,
+                latestApp: "Rapid switching"
+            ),
+            snapshot(
+                state: .idlePaused,
+                context: .paused,
+                driftScore: 5,
+                latestApp: "None"
+            )
+        ]
+    }()
 
     var count: Int {
         Self.demoSnapshots.count
@@ -93,10 +99,10 @@ struct MockTelemetryProvider {
 }
 
 // Future native providers can layer in NSWorkspace foreground-app changes,
-// AppKit activation notifications, user-granted AXUIElement window metadata,
-// a menu bar agent, a floating HUD window, and local timeline storage. This
-// mock provider intentionally adds no screenshots, keystroke logging, clipboard
-// access, page scraping, message reading, or private screen capture.
+// AppKit activation notifications, user-granted window metadata, a menu bar
+// agent, a floating HUD window, and local timeline storage. This mock provider
+// intentionally adds no screenshots, keystroke logging, clipboard access, page
+// scraping, message reading, or private screen capture.
 extension AttentionSnapshot {
     func refreshed(at date: Date = Date()) -> AttentionSnapshot {
         AttentionSnapshot(
@@ -107,7 +113,7 @@ extension AttentionSnapshot {
             latestApp: latestApp,
             latestTitle: latestTitle,
             telemetryStatus: telemetryStatus,
-            interventionMessage: interventionMessage,
+            intervention: intervention,
             lastUpdated: date
         )
     }

@@ -6,6 +6,9 @@ enum DesignTokens {
         static let glassBackground = Color.white.opacity(0.08)
         static let panelBackground = Color.white.opacity(0.055)
         static let elevatedPanelBackground = Color.white.opacity(0.085)
+        static let liquidGlassTop = Color.white.opacity(0.15)
+        static let liquidGlassBottom = Color.black.opacity(0.10)
+        static let innerHighlight = Color.white.opacity(0.18)
         static let glassBorder = Color.white.opacity(0.16)
         static let quietBorder = Color.white.opacity(0.08)
         static let ringTrack = Color.white.opacity(0.12)
@@ -80,34 +83,35 @@ enum DesignTokens {
     enum Spacing {
         static let xs: CGFloat = 4
         static let sm: CGFloat = 8
-        static let md: CGFloat = 14
-        static let lg: CGFloat = 22
-        static let xl: CGFloat = 32
+        static let md: CGFloat = 12
+        static let lg: CGFloat = 18
+        static let xl: CGFloat = 26
     }
 
     enum Radius {
-        static let card: CGFloat = 24
-        static let innerCard: CGFloat = 18
+        static let card: CGFloat = 22
+        static let innerCard: CGFloat = 14
         static let pill: CGFloat = 12
     }
 
     enum Layout {
-        static let hudMinWidth: CGFloat = 390
-        static let hudIdealWidth: CGFloat = 440
-        static let hudMaxWidth: CGFloat = 520
-        static let hudMinHeight: CGFloat = 520
-        static let hudIdealHeight: CGFloat = 570
-        static let hudMaxHeight: CGFloat = 660
-        static let ringSize: CGFloat = 138
-        static let ringLineWidth: CGFloat = 14
+        static let hudMinWidth: CGFloat = 320
+        static let hudIdealWidth: CGFloat = 360
+        static let hudMaxWidth: CGFloat = 420
+        static let hudMinHeight: CGFloat = 330
+        static let hudIdealHeight: CGFloat = 380
+        static let hudMaxHeight: CGFloat = 680
+        static let expandedDetailMaxHeight: CGFloat = 300
+        static let ringSize: CGFloat = 112
+        static let ringLineWidth: CGFloat = 11
     }
 
     enum Typography {
-        static let appTitle = Font.system(size: 24, weight: .semibold, design: .rounded)
-        static let state = Font.system(size: 26, weight: .semibold, design: .rounded)
-        static let score = Font.system(size: 32, weight: .semibold, design: .rounded)
+        static let appTitle = Font.system(size: 20, weight: .semibold, design: .rounded)
+        static let state = Font.system(size: 22, weight: .semibold, design: .rounded)
+        static let score = Font.system(size: 28, weight: .semibold, design: .rounded)
         static let metric = Font.system(size: 13, weight: .medium, design: .rounded)
         static let caption = Font.system(size: 11, weight: .medium, design: .rounded)
-        static let intervention = Font.system(size: 14, weight: .regular, design: .rounded)
+        static let intervention = Font.system(size: 13, weight: .regular, design: .rounded)
     }
 }

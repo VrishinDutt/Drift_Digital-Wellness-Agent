@@ -4,7 +4,7 @@ struct ReasoningEngine {
     /// Native counterpart to Python's `agent.reasoning_engine`.
     ///
     /// This layer should remain humane: it turns behavioral signals into an
-    /// attention-state interpretation, not a productivity judgment.
+    /// attention-state interpretation, not a performance judgment.
     func inferState(
         context: AttentionContext,
         driftScore: Int,

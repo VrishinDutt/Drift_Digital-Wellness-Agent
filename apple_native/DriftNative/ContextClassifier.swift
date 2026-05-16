@@ -8,7 +8,7 @@ struct ContextClassifier {
     /// - `telemetry.browser_context`
     ///
     /// Future native implementation can combine NSWorkspace foreground app
-    /// identity with user-granted Accessibility window titles. It must stay
+    /// identity with user-granted window metadata. It must stay
     /// metadata-only: no screenshots, OCR, page body scraping, clipboard access,
     /// keystroke capture, or hidden private content collection.
     func classify(appName: String, windowTitle: String?) -> AttentionContext {
@@ -24,12 +24,8 @@ struct ContextClassifier {
             return .passiveConsumption
         }
 
-        if containsAny(combined, ["spotify", "apple music", "music", "endel", "lofi"]) {
+        if containsAny(combined, ["spotify", "apple music", "music", "lofi"]) {
             return .audioRegulation
-        }
-
-        if containsAny(combined, ["stackoverflow", "stack overflow", "stackexchange", "stack exchange", "github"]) {
-            return .research
         }
 
         if containsAny(combined, ["chatgpt", "codex", "claude", "perplexity"]) {
@@ -40,10 +36,16 @@ struct ContextClassifier {
             return .development
         }
 
+        if containsAny(combined, ["stackoverflow", "stack overflow", "stackexchange", "stack exchange", "github", "developer documentation"]) {
+            return .research
+        }
+
         if containsAny(combined, ["docs", "notion", "obsidian", "pages", "word"]) {
             return .deepWork
         }
 
+        // With NSWorkspace v0.1, browsers expose only the app name. Safari alone
+        // is not enough to infer YouTube, Reddit, or research content.
         if containsAny(app, ["safari", "chrome", "arc", "firefox", "edge"]) {
             return .generalBrowsing
         }

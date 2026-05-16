@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HUDView: View {
     @ObservedObject var viewModel: HUDViewModel
+    @State private var isExpanded = false
     @State private var ringPulse = false
 
     private var snapshot: AttentionSnapshot {
@@ -20,56 +21,36 @@ struct HUDView: View {
         ZStack {
             background
 
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.lg) {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
                 header
+                glance
+                compactVitals
+                gentleSignal
+                controls
 
-                HStack(alignment: .center, spacing: DesignTokens.Spacing.lg) {
-                    stateRing
-
-                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-                        Text(snapshot.state.displayName)
-                            .font(DesignTokens.Typography.state)
-                            .foregroundStyle(accent)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.78)
-                            .animation(.easeInOut(duration: 0.35), value: snapshot.state)
-
-                        Text(snapshot.context.displayName)
-                            .font(DesignTokens.Typography.metric)
-                            .foregroundStyle(DesignTokens.ColorToken.secondaryText)
-
-                        HStack(spacing: DesignTokens.Spacing.sm) {
-                            scorePill
-                            telemetryPill
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                if isExpanded {
+                    expandedDetail
+                        .transition(.opacity)
+                        .clipped()
+                        .compositingGroup()
                 }
-
-                Divider()
-                    .overlay(DesignTokens.ColorToken.quietBorder)
-
-                VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
-                    vitalRow(label: "Latest app", value: snapshot.latestApp)
-
-                    if let latestTitle = snapshot.latestTitle, !latestTitle.isEmpty {
-                        vitalRow(label: "Surface", value: latestTitle)
-                    }
-                }
-
-                interventionPanel
-
-                footer
             }
-            .padding(DesignTokens.Spacing.lg)
+            .padding(DesignTokens.Spacing.md)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DesignTokens.Radius.card, style: .continuous))
             .overlay(glassOverlay)
             .overlay(
                 RoundedRectangle(cornerRadius: DesignTokens.Radius.card, style: .continuous)
-                    .stroke(DesignTokens.ColorToken.glassBorder, lineWidth: 1)
+                    .strokeBorder(DesignTokens.ColorToken.glassBorder, lineWidth: 1)
             )
-            .shadow(color: .black.opacity(0.34), radius: 28, x: 0, y: 18)
-            .padding(DesignTokens.Spacing.lg)
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignTokens.Radius.card - 1, style: .continuous)
+                    .strokeBorder(DesignTokens.ColorToken.innerHighlight, lineWidth: 0.5)
+                    .padding(1)
+            )
+            .shadow(color: accent.opacity(0.08), radius: 22, x: 0, y: 10)
+            .shadow(color: .black.opacity(0.30), radius: 26, x: 0, y: 16)
+            .padding(DesignTokens.Spacing.sm)
+            .frame(maxWidth: DesignTokens.Layout.hudMaxWidth)
         }
         .onChange(of: snapshot.id) { _, _ in
             triggerRingPulse()
@@ -82,9 +63,9 @@ struct HUDView: View {
 
             LinearGradient(
                 colors: [
-                    secondaryAccent.opacity(0.22),
+                    secondaryAccent.opacity(0.16),
                     Color.clear,
-                    accent.opacity(0.12)
+                    accent.opacity(0.08)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -94,20 +75,43 @@ struct HUDView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+        HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text("Drift")
                     .font(DesignTokens.Typography.appTitle)
                     .foregroundStyle(DesignTokens.ColorToken.primaryText)
 
-                Text("attention vitals")
+                Text("digital rhythm")
                     .font(DesignTokens.Typography.caption)
                     .foregroundStyle(DesignTokens.ColorToken.quietText)
             }
 
-            Spacer()
+            Spacer(minLength: DesignTokens.Spacing.sm)
+            modePill
+        }
+    }
 
-            statusDot
+    private var glance: some View {
+        HStack(alignment: .center, spacing: DesignTokens.Spacing.md) {
+            stateRing
+
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                Text(snapshot.state.displayName)
+                    .font(DesignTokens.Typography.state)
+                    .foregroundStyle(accent)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.82)
+
+                Text(snapshot.context.displayName)
+                    .font(DesignTokens.Typography.metric)
+                    .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                    .lineLimit(1)
+
+                Text("Drift \(snapshot.driftScore)")
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(DesignTokens.ColorToken.quietText)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -119,12 +123,12 @@ struct HUDView: View {
                 .fill(
                     RadialGradient(
                         colors: [
-                            accent.opacity(0.18),
-                            accent.opacity(0.045),
+                            accent.opacity(0.16),
+                            accent.opacity(0.04),
                             Color.clear
                         ],
                         center: .center,
-                        startRadius: 8,
+                        startRadius: 6,
                         endRadius: DesignTokens.Layout.ringSize / 2
                     )
                 )
@@ -135,19 +139,13 @@ struct HUDView: View {
             Circle()
                 .trim(from: 0, to: progress)
                 .stroke(
-                    AngularGradient(
-                        colors: [accent, secondaryAccent, accent],
-                        center: .center
-                    ),
-                    style: StrokeStyle(
-                        lineWidth: DesignTokens.Layout.ringLineWidth,
-                        lineCap: .round
-                    )
+                    AngularGradient(colors: [accent, secondaryAccent, accent], center: .center),
+                    style: StrokeStyle(lineWidth: DesignTokens.Layout.ringLineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
-                .animation(.easeInOut(duration: 0.45), value: snapshot.driftScore)
+                .animation(.easeInOut(duration: 0.35), value: snapshot.driftScore)
 
-            VStack(spacing: DesignTokens.Spacing.xs) {
+            VStack(spacing: 1) {
                 Text("\(snapshot.driftScore)")
                     .font(DesignTokens.Typography.score)
                     .foregroundStyle(accent)
@@ -160,64 +158,336 @@ struct HUDView: View {
         }
         .frame(width: DesignTokens.Layout.ringSize, height: DesignTokens.Layout.ringSize)
         .scaleEffect(ringPulse ? 1.025 : 1)
-        .animation(.easeOut(duration: 0.28), value: ringPulse)
+        .animation(.easeOut(duration: 0.24), value: ringPulse)
+        .hudHoverLift(accent: accent, scale: 1.03)
         .accessibilityLabel("Drift score \(snapshot.driftScore)")
     }
 
-    private var scorePill: some View {
-        Text("Drift \(snapshot.driftScore)")
-            .font(DesignTokens.Typography.caption)
-            .foregroundStyle(accent)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(accent.opacity(0.11))
-            .clipShape(Capsule())
-            .overlay(
-                Capsule()
-                    .stroke(accent.opacity(0.26), lineWidth: 1)
-            )
-    }
-
-    private var telemetryPill: some View {
-        let statusColor = DesignTokens.ColorToken.telemetry(snapshot.telemetryStatus)
-
-        return Text(snapshot.telemetryStatus.displayName)
-            .font(DesignTokens.Typography.caption)
-            .foregroundStyle(statusColor)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(statusColor.opacity(0.10))
-            .clipShape(Capsule())
-            .overlay(
-                Capsule()
-                    .stroke(statusColor.opacity(0.28), lineWidth: 1)
-            )
-    }
-
-    private var statusDot: some View {
-        let statusColor = DesignTokens.ColorToken.telemetry(snapshot.telemetryStatus)
-
-        return HStack(spacing: 6) {
-            Circle()
-                .fill(statusColor)
-                .frame(width: 7, height: 7)
-
-            Text("Telemetry \(snapshot.telemetryStatus.displayName)")
-                .font(DesignTokens.Typography.caption)
-                .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+    private var compactVitals: some View {
+        HStack(spacing: DesignTokens.Spacing.sm) {
+            tinyCard(label: "Latest app", value: snapshot.latestApp)
+            tinyCard(label: "Mode", value: viewModel.telemetryMode.displayName)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(DesignTokens.ColorToken.panelBackground)
-        .clipShape(Capsule())
     }
 
-    private func vitalRow(label: String, value: String) -> some View {
-        HStack(alignment: .firstTextBaseline) {
+    private func tinyCard(label: String, value: String) -> some View {
+        InteractiveHUDCard(accent: accent, scale: 1.02, padding: DesignTokens.Spacing.sm) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(DesignTokens.ColorToken.quietText)
+
+                Text(value)
+                    .font(DesignTokens.Typography.metric)
+                    .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .minimumScaleFactor(0.78)
+            }
+        }
+    }
+
+    private var gentleSignal: some View {
+        InteractiveHUDCard(accent: accent, scale: 1.018, padding: DesignTokens.Spacing.sm) {
+            Text(viewModel.compactInterventionLine)
+                .font(DesignTokens.Typography.intervention)
+                .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var controls: some View {
+        HStack(spacing: DesignTokens.Spacing.sm) {
+            Picker(
+                "Mode",
+                selection: Binding(
+                    get: { viewModel.telemetryMode },
+                    set: { viewModel.setTelemetryMode($0) }
+                )
+            ) {
+                ForEach(TelemetryMode.allCases) { mode in
+                    Text(mode.displayName).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .frame(width: 152)
+            .hudHoverLift(accent: accent, scale: 1.015)
+
+            Spacer(minLength: DesignTokens.Spacing.xs)
+
+            if viewModel.telemetryMode == .mock {
+                Button {
+                    viewModel.advanceSnapshot()
+                } label: {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .tint(accent)
+                .help("Next State")
+                .hudHoverLift(accent: accent, scale: 1.03)
+            }
+
+            Button {
+                toggleExpanded()
+            } label: {
+                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .tint(accent)
+            .help(isExpanded ? "Collapse" : "Expand")
+            .hudHoverLift(accent: accent, scale: 1.03)
+        }
+    }
+
+    private var expandedDetail: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+                Divider()
+                    .overlay(DesignTokens.ColorToken.quietBorder)
+
+                detailCard("Current") {
+                    VStack(spacing: DesignTokens.Spacing.xs) {
+                        detailRow("State", snapshot.state.displayName)
+                        detailRow("Context", snapshot.context.displayName)
+                        detailRow("Latest", snapshot.latestApp)
+                        detailRow("Status", snapshot.telemetryStatus.displayName)
+                    }
+                }
+
+                detailCard("Why") {
+                    Text(viewModel.readingExplanation)
+                        .font(DesignTokens.Typography.intervention)
+                        .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                detailCard("Intervention") {
+                    interventionDetail
+                }
+
+                detailCard("Recent Signal") {
+                    VStack(spacing: DesignTokens.Spacing.xs) {
+                        ForEach(viewModel.recentSignal.prefix(5), id: \.timestamp) { sample in
+                            recentSampleRow(sample)
+                        }
+                    }
+                }
+
+                detailCard("Privacy") {
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                        Text("No screenshots, keystrokes, clipboard, or page text are collected.")
+                            .font(DesignTokens.Typography.intervention)
+                            .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Text("Buffer \(viewModel.bufferSizeDescription) • Updated \(snapshot.lastUpdated, style: .time)")
+                            .font(DesignTokens.Typography.caption)
+                            .foregroundStyle(DesignTokens.ColorToken.quietText)
+                    }
+                }
+
+                detailCard("System") {
+                    VStack(spacing: DesignTokens.Spacing.xs) {
+                        detailRow("Mode", viewModel.telemetryMode.displayName)
+                        detailRow("Buffer", viewModel.bufferSizeDescription)
+                        detailRow("Status", snapshot.telemetryStatus.displayName)
+                    }
+                }
+
+                detailCard("Diagnostics") {
+                    diagnosticsList
+                }
+            }
+            .padding(.top, DesignTokens.Spacing.xs)
+        }
+        .frame(maxHeight: DesignTokens.Layout.expandedDetailMaxHeight)
+        .clipped()
+    }
+
+    private var diagnosticsList: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+            if viewModel.diagnosticEntries.isEmpty {
+                Text("No recent internal events.")
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(DesignTokens.ColorToken.quietText)
+            } else {
+                ForEach(viewModel.diagnosticEntries.prefix(5)) { entry in
+                    HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {
+                        Text(entry.category.displayName)
+                            .font(DesignTokens.Typography.caption)
+                            .foregroundStyle(accent)
+                            .frame(width: 70, alignment: .leading)
+
+                        Text(entry.message)
+                            .font(DesignTokens.Typography.caption)
+                            .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
+        }
+    }
+
+    private var interventionDetail: some View {
+        let intervention = snapshot.intervention
+
+        return VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                Text(intervention.title)
+                    .font(DesignTokens.Typography.metric)
+                    .foregroundStyle(DesignTokens.ColorToken.primaryText)
+
+                Text(intervention.message)
+                    .font(DesignTokens.Typography.intervention)
+                    .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text(viewModel.interventionStatus)
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(DesignTokens.ColorToken.quietText)
+            }
+
+            if let selectedIntention = viewModel.selectedIntention {
+                Text("Intention set: \(selectedIntention)")
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(accent)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(accent.opacity(0.10))
+                    .clipShape(Capsule())
+            }
+
+            if intervention.hasChoices {
+                HStack(spacing: DesignTokens.Spacing.xs) {
+                    ForEach(intervention.choices, id: \.self) { choice in
+                        capsuleButton(choice) {
+                            viewModel.selectInterventionChoice(choice)
+                        }
+                    }
+                }
+            }
+
+            if intervention.kind == .breathingReset {
+                breathingResetControl
+            }
+        }
+    }
+
+    private var breathingResetControl: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+            if viewModel.isBreathingResetActive {
+                HStack(spacing: DesignTokens.Spacing.md) {
+                    breathingCue
+
+                    Button {
+                        viewModel.dismissBreathingReset()
+                    } label: {
+                        Text("Dismiss")
+                    }
+                    .buttonStyle(.plain)
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 6)
+                    .background(DesignTokens.ColorToken.panelBackground)
+                    .clipShape(Capsule())
+                    .hudHoverLift(accent: accent, scale: 1.02)
+                }
+            } else {
+                capsuleButton("Begin breathing cue") {
+                    viewModel.startBreathingReset()
+                }
+            }
+        }
+    }
+
+    private var breathingCue: some View {
+        let progress: CGFloat = viewModel.breathingPhase == .inhale ? 0.82 : 0.42
+
+        return ZStack {
+            Circle()
+                .stroke(DesignTokens.ColorToken.ringTrack, lineWidth: 6)
+
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(accent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .animation(.easeInOut(duration: 2.2), value: viewModel.breathingPhase)
+
+            Text(viewModel.breathingPhase.rawValue)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.primaryText)
+        }
+        .frame(width: 72, height: 72)
+        .scaleEffect(viewModel.breathingPhase == .inhale ? 1.03 : 0.98)
+        .animation(.easeInOut(duration: 2.2), value: viewModel.breathingPhase)
+    }
+
+    private func capsuleButton(
+        _ title: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 6)
+                .background(accent.opacity(0.10))
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(accent.opacity(0.22), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+        .hudHoverLift(accent: accent, scale: 1.035)
+    }
+
+    private func detailCard<Content: View>(
+        _ title: String,
+        @ViewBuilder content: @escaping () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+            Text(title)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+
+            InteractiveHUDCard(accent: accent, scale: 1.012, padding: DesignTokens.Spacing.sm) {
+                content()
+            }
+        }
+    }
+
+    private func recentSampleRow(_ sample: TelemetrySample) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {
+            Text(sample.appName)
+                .font(DesignTokens.Typography.metric)
+                .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                .lineLimit(1)
+                .truncationMode(.tail)
+
+            Spacer(minLength: DesignTokens.Spacing.sm)
+
+            Text(sample.timestamp, style: .time)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+        }
+    }
+
+    private func detailRow(_ label: String, _ value: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {
             Text(label)
                 .font(DesignTokens.Typography.caption)
                 .foregroundStyle(DesignTokens.ColorToken.quietText)
-                .frame(width: 78, alignment: .leading)
+                .frame(width: 48, alignment: .leading)
 
             Text(value)
                 .font(DesignTokens.Typography.metric)
@@ -229,56 +499,27 @@ struct HUDView: View {
         }
     }
 
-    private var interventionPanel: some View {
-        Text(snapshot.interventionMessage)
-            .font(DesignTokens.Typography.intervention)
-            .foregroundStyle(DesignTokens.ColorToken.primaryText)
-            .lineSpacing(2)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(DesignTokens.Spacing.md)
-            .background(DesignTokens.ColorToken.elevatedPanelBackground)
-            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.innerCard, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.innerCard, style: .continuous)
-                    .stroke(accent.opacity(0.24), lineWidth: 1)
-            )
-    }
+    private var modePill: some View {
+        let statusColor = DesignTokens.ColorToken.telemetry(snapshot.telemetryStatus)
 
-    private var footer: some View {
-        HStack(spacing: DesignTokens.Spacing.md) {
-            Text("Updated \(snapshot.lastUpdated, style: .time)")
+        return HStack(spacing: 6) {
+            Circle()
+                .fill(statusColor)
+                .frame(width: 6, height: 6)
+
+            Text(snapshot.telemetryStatus.displayName)
                 .font(DesignTokens.Typography.caption)
-                .foregroundStyle(DesignTokens.ColorToken.quietText)
-
-            Spacer()
-
-            Toggle(
-                "Auto",
-                isOn: Binding(
-                    get: { viewModel.isAutoCycleEnabled },
-                    set: { isEnabled in
-                        if isEnabled {
-                            viewModel.startMockCycle()
-                        } else {
-                            viewModel.stopMockCycle()
-                        }
-                    }
-                )
-            )
-            .toggleStyle(.switch)
-            .controlSize(.mini)
-            .font(DesignTokens.Typography.caption)
-            .foregroundStyle(DesignTokens.ColorToken.secondaryText)
-
-            Button {
-                viewModel.advanceSnapshot()
-            } label: {
-                Label("Next State", systemImage: "arrow.triangle.2.circlepath")
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .tint(accent)
+                .foregroundStyle(statusColor)
+                .lineLimit(1)
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(statusColor.opacity(0.09))
+        .clipShape(Capsule())
+        .overlay(
+            Capsule()
+                .stroke(statusColor.opacity(0.24), lineWidth: 1)
+        )
     }
 
     private var glassOverlay: some View {
@@ -286,9 +527,9 @@ struct HUDView: View {
             .fill(
                 LinearGradient(
                     colors: [
-                        Color.white.opacity(0.12),
-                        Color.white.opacity(0.04),
-                        Color.black.opacity(0.05)
+                        DesignTokens.ColorToken.liquidGlassTop,
+                        Color.white.opacity(0.045),
+                        DesignTokens.ColorToken.liquidGlassBottom
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -297,16 +538,110 @@ struct HUDView: View {
             .allowsHitTesting(false)
     }
 
+    private func toggleExpanded() {
+        var transaction = Transaction(animation: .easeInOut(duration: 0.16))
+        transaction.disablesAnimations = false
+
+        withTransaction(transaction) {
+            isExpanded.toggle()
+        }
+    }
+
     private func triggerRingPulse() {
-        withAnimation(.easeOut(duration: 0.16)) {
+        withAnimation(.easeOut(duration: 0.14)) {
             ringPulse = true
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
-            withAnimation(.easeOut(duration: 0.32)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.20) {
+            withAnimation(.easeOut(duration: 0.24)) {
                 ringPulse = false
             }
         }
+    }
+}
+
+private struct InteractiveHUDCard<Content: View>: View {
+    let accent: Color
+    let padding: CGFloat
+    let content: () -> Content
+    @State private var isHovered = false
+
+    init(
+        accent: Color,
+        scale: CGFloat = 1.02,
+        padding: CGFloat = DesignTokens.Spacing.sm,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.accent = accent
+        self.padding = padding
+        self.content = content
+    }
+
+    var body: some View {
+        content()
+            .padding(padding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: DesignTokens.Radius.innerCard, style: .continuous))
+            .background(
+                RoundedRectangle(cornerRadius: DesignTokens.Radius.innerCard, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(isHovered ? 0.105 : 0.075),
+                                DesignTokens.ColorToken.elevatedPanelBackground,
+                                Color.black.opacity(0.035)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.innerCard, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignTokens.Radius.innerCard, style: .continuous)
+                    .strokeBorder(isHovered ? accent.opacity(0.28) : DesignTokens.ColorToken.quietBorder, lineWidth: 1)
+            )
+            .shadow(
+                color: isHovered ? accent.opacity(0.12) : .black.opacity(0.10),
+                radius: isHovered ? 9 : 5,
+                x: 0,
+                y: isHovered ? 4 : 2
+            )
+            .animation(.easeOut(duration: 0.16), value: isHovered)
+            .onHover { hovering in
+                isHovered = hovering
+            }
+    }
+}
+
+private struct HoverLiftModifier: ViewModifier {
+    let accent: Color
+    let scale: CGFloat
+    @State private var isHovered = false
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignTokens.Radius.pill, style: .continuous)
+                    .strokeBorder(isHovered ? accent.opacity(0.20) : .clear, lineWidth: 1)
+                    .allowsHitTesting(false)
+            )
+            .shadow(
+                color: isHovered ? accent.opacity(0.12) : .clear,
+                radius: isHovered ? 7 : 0,
+                x: 0,
+                y: isHovered ? 3 : 0
+            )
+            .animation(.easeOut(duration: 0.16), value: isHovered)
+            .onHover { hovering in
+                isHovered = hovering
+            }
+    }
+}
+
+private extension View {
+    func hudHoverLift(accent: Color, scale: CGFloat = 1.02) -> some View {
+        modifier(HoverLiftModifier(accent: accent, scale: scale))
     }
 }
 
