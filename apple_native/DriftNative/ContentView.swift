@@ -15,6 +15,7 @@ struct ContentView: View {
                 idealHeight: DesignTokens.Layout.hudIdealHeight,
                 maxHeight: DesignTokens.Layout.hudMaxHeight
             )
+            .background(DesignTokens.ColorToken.appBackground)
             .onAppear {
                 viewModel.startMockCycle()
             }

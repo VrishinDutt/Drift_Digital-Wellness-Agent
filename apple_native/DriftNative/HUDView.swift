@@ -4,6 +4,8 @@ struct HUDView: View {
     @ObservedObject var viewModel: HUDViewModel
     @State private var isExpanded = false
     @State private var ringPulse = false
+    @State private var isShowingLearnMore = false
+    @State private var isShowingModeChooser = false
 
     private var snapshot: AttentionSnapshot {
         viewModel.snapshot
@@ -21,12 +23,10 @@ struct HUDView: View {
         ZStack {
             background
 
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.md) {
+            VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
                 header
                 glance
                 compactVitals
-                gentleSignal
-                controls
 
                 if isExpanded {
                     expandedDetail
@@ -36,6 +36,7 @@ struct HUDView: View {
                 }
             }
             .padding(DesignTokens.Spacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DesignTokens.Radius.card, style: .continuous))
             .overlay(glassOverlay)
             .overlay(
@@ -52,6 +53,7 @@ struct HUDView: View {
             .padding(DesignTokens.Spacing.sm)
             .frame(maxWidth: DesignTokens.Layout.hudMaxWidth)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .onChange(of: snapshot.id) { _, _ in
             triggerRingPulse()
         }
@@ -75,19 +77,15 @@ struct HUDView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Drift")
-                    .font(DesignTokens.Typography.appTitle)
-                    .foregroundStyle(DesignTokens.ColorToken.primaryText)
-
-                Text("digital rhythm")
-                    .font(DesignTokens.Typography.caption)
-                    .foregroundStyle(DesignTokens.ColorToken.quietText)
-            }
+        HStack(alignment: .center, spacing: DesignTokens.Spacing.sm) {
+            Text("Drift")
+                .font(DesignTokens.Typography.appTitle)
+                .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                .lineLimit(1)
 
             Spacer(minLength: DesignTokens.Spacing.sm)
             modePill
+            expandButton
         }
     }
 
@@ -95,24 +93,38 @@ struct HUDView: View {
         HStack(alignment: .center, spacing: DesignTokens.Spacing.md) {
             stateRing
 
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-                Text(snapshot.state.displayName)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(compactStateLabel)
                     .font(DesignTokens.Typography.state)
                     .foregroundStyle(accent)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.82)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.88)
+                    .allowsTightening(true)
 
-                Text(snapshot.context.displayName)
+                Text(compactContextLabel)
                     .font(DesignTokens.Typography.metric)
                     .foregroundStyle(DesignTokens.ColorToken.secondaryText)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.90)
+                    .allowsTightening(true)
 
-                Text("Drift \(snapshot.driftScore)")
-                    .font(DesignTokens.Typography.caption)
-                    .foregroundStyle(DesignTokens.ColorToken.quietText)
+                HStack(spacing: 5) {
+                    Image(systemName: compactCueIcon)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(accent.opacity(0.88))
+                        .frame(width: 12)
+
+                    Text(compactCueText)
+                        .font(DesignTokens.Typography.caption)
+                        .foregroundStyle(DesignTokens.ColorToken.quietText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.90)
+                        .allowsTightening(true)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .padding(.vertical, 2)
     }
 
     private var stateRing: some View {
@@ -165,83 +177,232 @@ struct HUDView: View {
     }
 
     private var compactVitals: some View {
-        HStack(spacing: DesignTokens.Spacing.sm) {
-            tinyCard(label: "Latest app", value: snapshot.latestApp)
-            tinyCard(label: "Mode", value: viewModel.telemetryMode.displayName)
+        HStack(spacing: 6) {
+            Image(systemName: "macwindow")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+
+            Text(compactLatestAppLabel)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.90)
+                .allowsTightening(true)
+
+            Text("·")
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+
+            Text(snapshot.lastUpdated, style: .time)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+                .lineLimit(1)
+
+            Spacer(minLength: 0)
         }
+        .padding(.horizontal, 2)
     }
 
-    private func tinyCard(label: String, value: String) -> some View {
-        InteractiveHUDCard(accent: accent, scale: 1.02, padding: DesignTokens.Spacing.sm) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(label)
+    private var expandedTestingControls: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+            Text("Current rhythm source")
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+
+            HStack(alignment: .center, spacing: DesignTokens.Spacing.sm) {
+                Picker(
+                    "Current rhythm source",
+                    selection: Binding(
+                        get: { viewModel.telemetryMode },
+                        set: { viewModel.setTelemetryMode($0) }
+                    )
+                ) {
+                    ForEach([TelemetryMode.liveApp, .mock]) { mode in
+                        Text(rhythmSourceLabel(for: mode)).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(width: 156)
+                .hudHoverLift(accent: accent, scale: 1.015)
+
+                Spacer(minLength: DesignTokens.Spacing.xs)
+
+                if viewModel.telemetryMode == .mock {
+                    Button {
+                        viewModel.advanceSnapshot()
+                    } label: {
+                        Label("Next state", systemImage: "forward.end.fill")
+                            .labelStyle(.titleAndIcon)
+                            .lineLimit(1)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .tint(accent)
+                    .help("Next state")
+                    .hudHoverLift(accent: accent, scale: 1.03)
+                }
+            }
+
+            Text(rhythmSourceDescription)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if viewModel.telemetryMode == .liveApp {
+                Text("Preview controls are hidden while using Now.")
                     .font(DesignTokens.Typography.caption)
                     .foregroundStyle(DesignTokens.ColorToken.quietText)
-
-                Text(value)
-                    .font(DesignTokens.Typography.metric)
-                    .foregroundStyle(DesignTokens.ColorToken.primaryText)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .minimumScaleFactor(0.78)
             }
         }
     }
 
-    private var gentleSignal: some View {
-        InteractiveHUDCard(accent: accent, scale: 1.018, padding: DesignTokens.Spacing.sm) {
-            Text(viewModel.compactInterventionLine)
-                .font(DesignTokens.Typography.intervention)
-                .foregroundStyle(DesignTokens.ColorToken.primaryText)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
+    private var compactStateLabel: String {
+        switch snapshot.state {
+        case .assistedDeepWork:
+            return "Deep Work"
+        case .developmentLoop:
+            return "Dev Loop"
+        case .researchFlow:
+            return "Research"
+        case .compulsiveDrift:
+            return "Sticky Loop"
+        case .idlePaused:
+            return "Paused"
+        default:
+            return snapshot.state.displayName
         }
     }
 
-    private var controls: some View {
-        HStack(spacing: DesignTokens.Spacing.sm) {
-            Picker(
-                "Mode",
-                selection: Binding(
-                    get: { viewModel.telemetryMode },
-                    set: { viewModel.setTelemetryMode($0) }
-                )
-            ) {
-                ForEach(TelemetryMode.allCases) { mode in
-                    Text(mode.displayName).tag(mode)
-                }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(width: 152)
-            .hudHoverLift(accent: accent, scale: 1.015)
-
-            Spacer(minLength: DesignTokens.Spacing.xs)
-
-            if viewModel.telemetryMode == .mock {
-                Button {
-                    viewModel.advanceSnapshot()
-                } label: {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .tint(accent)
-                .help("Next State")
-                .hudHoverLift(accent: accent, scale: 1.03)
-            }
-
-            Button {
-                toggleExpanded()
-            } label: {
-                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .tint(accent)
-            .help(isExpanded ? "Collapse" : "Expand")
-            .hudHoverLift(accent: accent, scale: 1.03)
+    private var compactContextLabel: String {
+        switch snapshot.context {
+        case .generalBrowsing:
+            return "Browsing"
+        case .passiveConsumption:
+            return "Passive loop"
+        case .audioRegulation:
+            return "Audio cue"
+        default:
+            return snapshot.context.displayName
         }
+    }
+
+    private var compactLatestAppLabel: String {
+        snapshot.latestApp.count > 24 ? "Recent app" : snapshot.latestApp
+    }
+
+    private var rhythmSourceLabel: String {
+        rhythmSourceLabel(for: viewModel.telemetryMode)
+    }
+
+    private var rhythmSourceDescription: String {
+        rhythmSourceDescription(for: viewModel.telemetryMode)
+    }
+
+    private var rhythmSourceColor: Color {
+        rhythmSourceColor(for: viewModel.telemetryMode)
+    }
+
+    private var signalStatusLabel: String {
+        switch snapshot.telemetryStatus {
+        case .mocked:
+            return "Preview"
+        case .live:
+            return "Reading"
+        case .stale:
+            return "Stale"
+        case .unavailable:
+            return "Unavailable"
+        }
+    }
+
+    private func rhythmSourceLabel(for mode: TelemetryMode) -> String {
+        switch mode {
+        case .liveApp:
+            return "Now"
+        case .mock:
+            return "Preview"
+        }
+    }
+
+    private func rhythmSourceDescription(for mode: TelemetryMode) -> String {
+        switch mode {
+        case .liveApp:
+            return "Using your current active app rhythm."
+        case .mock:
+            return "Explore Drift states without using your current app."
+        }
+    }
+
+    private func rhythmSourceColor(for mode: TelemetryMode) -> Color {
+        switch mode {
+        case .liveApp:
+            return DesignTokens.ColorToken.nowMode
+        case .mock:
+            return DesignTokens.ColorToken.previewMode
+        }
+    }
+
+    private var compactCueText: String {
+        switch snapshot.intervention.kind {
+        case .breathingReset:
+            return "Breathing cue · one breath"
+        case .softPause:
+            return "Soft pause · reset"
+        case .reflectivePrompt:
+            return "Intention · choose next"
+        case .rhythmTransitionSuggestion:
+            return compactRhythmCueText
+        case .none:
+            return compactRhythmCueText
+        }
+    }
+
+    private var compactRhythmCueText: String {
+        switch snapshot.rhythmPlan.mode {
+        case .deepWorkRhythm:
+            return "Focus flow · steady"
+        case .risingEnergyRhythm:
+            return "Rising energy · gentle lift"
+        case .downshiftRhythm:
+            return "Downshift · softer rhythm"
+        case .windDownRhythm:
+            return "Wind-down · lower pace"
+        case .startUpRhythm:
+            return "Start-up · light momentum"
+        case .visualBreathingCue:
+            return "Breathing cue · one breath"
+        case .none:
+            switch snapshot.state {
+            case .focused, .assistedDeepWork, .developmentLoop, .researchFlow:
+                return "Steady rhythm"
+            case .idlePaused:
+                return "Paused · re-enter gently"
+            case .unknown:
+                return "No cue needed"
+            default:
+                return "No cue needed"
+            }
+        }
+    }
+
+    private var compactCueIcon: String {
+        switch snapshot.intervention.kind {
+        case .breathingReset:
+            return "lungs.fill"
+        case .rhythmTransitionSuggestion:
+            return "waveform"
+        case .softPause:
+            return "pause.fill"
+        case .reflectivePrompt:
+            return "arrow.turn.down.right"
+        case .none:
+            return "waveform"
+        }
+    }
+
+    private var learnMoreCopy: LearnMoreCopy {
+        LearnMoreCopy.copy(for: snapshot.state)
     }
 
     private var expandedDetail: some View {
@@ -250,73 +411,212 @@ struct HUDView: View {
                 Divider()
                     .overlay(DesignTokens.ColorToken.quietBorder)
 
-                detailCard("Current") {
-                    VStack(spacing: DesignTokens.Spacing.xs) {
-                        detailRow("State", snapshot.state.displayName)
-                        detailRow("Context", snapshot.context.displayName)
-                        detailRow("Latest", snapshot.latestApp)
-                        detailRow("Status", snapshot.telemetryStatus.displayName)
-                    }
-                }
-
-                detailCard("Why") {
-                    Text(viewModel.readingExplanation)
-                        .font(DesignTokens.Typography.intervention)
-                        .foregroundStyle(DesignTokens.ColorToken.primaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                if viewModel.hasSoundscapeSuggestion {
-                    detailCard("Rhythm") {
-                        rhythmDetail
-                    }
-                }
-
-                detailCard("Apple Music") {
-                    appleMusicDetail
-                }
-
-                detailCard("Intervention") {
-                    interventionDetail
-                }
-
-                detailCard("Recent Signal") {
-                    VStack(spacing: DesignTokens.Spacing.xs) {
-                        ForEach(viewModel.recentSignal.prefix(5), id: \.timestamp) { sample in
-                            recentSampleRow(sample)
+                if isShowingLearnMore {
+                    learnMorePanel
+                } else {
+                    detailCard("Current") {
+                        VStack(spacing: DesignTokens.Spacing.xs) {
+                            detailRow("State", snapshot.state.displayName)
+                            detailRow("Context", snapshot.context.displayName)
+                            detailRow("Latest", snapshot.latestApp)
+                            detailRow("Signal", signalStatusLabel)
                         }
                     }
-                }
 
-                detailCard("Privacy") {
-                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-                        Text("No screenshots, keystrokes, clipboard, or page text are collected.")
+                    detailCard("Why") {
+                        Text(viewModel.readingExplanation)
                             .font(DesignTokens.Typography.intervention)
                             .foregroundStyle(DesignTokens.ColorToken.primaryText)
                             .fixedSize(horizontal: false, vertical: true)
-
-                        Text("Buffer \(viewModel.bufferSizeDescription) • Updated \(snapshot.lastUpdated, style: .time)")
-                            .font(DesignTokens.Typography.caption)
-                            .foregroundStyle(DesignTokens.ColorToken.quietText)
                     }
-                }
 
-                detailCard("System") {
-                    VStack(spacing: DesignTokens.Spacing.xs) {
-                        detailRow("Mode", viewModel.telemetryMode.displayName)
-                        detailRow("Buffer", viewModel.bufferSizeDescription)
-                        detailRow("Status", snapshot.telemetryStatus.displayName)
+                    detailCard("Learn More") {
+                        learnMoreEntry
                     }
-                }
 
-                detailCard("Diagnostics") {
-                    diagnosticsList
+                    detailCard("Local Soundscape") {
+                        rhythmDetail
+                    }
+
+                    detailCard("Apple Music") {
+                        appleMusicDetail
+                    }
+
+                    detailCard("Intervention") {
+                        interventionDetail
+                    }
+
+                    detailCard("Privacy & System") {
+                        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                            Text("No screenshots, keystrokes, clipboard, or page text are collected.")
+                                .font(DesignTokens.Typography.intervention)
+                                .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                                .fixedSize(horizontal: false, vertical: true)
+
+                            Text("Buffer \(viewModel.bufferSizeDescription) · Updated \(snapshot.lastUpdated, style: .time)")
+                                .font(DesignTokens.Typography.caption)
+                                .foregroundStyle(DesignTokens.ColorToken.quietText)
+
+                            Divider()
+                                .overlay(DesignTokens.ColorToken.quietBorder)
+
+                            detailRow("Source", rhythmSourceLabel)
+                            detailRow("Signal", signalStatusLabel)
+                            expandedTestingControls
+                        }
+                    }
+
+                    detailCard("Diagnostics") {
+                        diagnosticsList
+                    }
                 }
             }
             .padding(.top, DesignTokens.Spacing.xs)
         }
         .frame(maxHeight: DesignTokens.Layout.expandedDetailMaxHeight)
         .clipped()
+    }
+
+    private var learnMoreEntry: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.16)) {
+                isShowingLearnMore = true
+            }
+        } label: {
+            HStack(spacing: DesignTokens.Spacing.sm) {
+                Image(systemName: "info.circle")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(accent)
+                    .frame(width: 18)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Learn More")
+                        .font(DesignTokens.Typography.metric)
+                        .foregroundStyle(DesignTokens.ColorToken.primaryText)
+
+                    Text("A short note on this state, cue, and privacy.")
+                        .font(DesignTokens.Typography.caption)
+                        .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                        .lineLimit(1)
+                }
+
+                Spacer(minLength: DesignTokens.Spacing.sm)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(DesignTokens.ColorToken.quietText)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var learnMorePanel: some View {
+        let copy = learnMoreCopy
+
+        return VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.16)) {
+                    isShowingLearnMore = false
+                }
+            } label: {
+                Label("Back", systemImage: "chevron.left")
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(DesignTokens.ColorToken.panelBackground)
+                    .clipShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .hudHoverLift(accent: accent, scale: 1.02)
+
+            detailCard("Attention") {
+                learnMoreSection(
+                    title: compactStateLabel,
+                    body: copy.meaning,
+                    systemImage: "circle.dotted"
+                )
+            }
+
+            detailCard("Cue") {
+                learnMoreSection(
+                    title: compactCueText,
+                    body: copy.cue,
+                    systemImage: compactCueIcon
+                )
+            }
+
+            detailCard("Why It Can Help") {
+                learnMoreSection(
+                    title: "Cognitive load",
+                    body: copy.science,
+                    systemImage: "brain.head.profile"
+                )
+            }
+
+            privacyLockSection
+        }
+    }
+
+    private func learnMoreSection(
+        title: String,
+        body: String,
+        systemImage: String
+    ) -> some View {
+        HStack(alignment: .top, spacing: DesignTokens.Spacing.sm) {
+            Image(systemName: systemImage)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(accent)
+                .frame(width: 18)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(DesignTokens.Typography.metric)
+                    .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                    .lineLimit(1)
+
+                Text(body)
+                    .font(DesignTokens.Typography.intervention)
+                    .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var privacyLockSection: some View {
+        detailCard("Privacy") {
+            HStack(alignment: .top, spacing: DesignTokens.Spacing.sm) {
+                ZStack {
+                    Circle()
+                        .fill(accent.opacity(0.11))
+
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(accent)
+                }
+                .frame(width: 34, height: 34)
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Your rhythm stays on this Mac.")
+                        .font(DesignTokens.Typography.metric)
+                        .foregroundStyle(DesignTokens.ColorToken.primaryText)
+
+                    Text("Drift uses local signals like active app changes and coarse state patterns. It does not collect screenshots, keystrokes, clipboard, page text, microphone input, or private messages.")
+                        .font(DesignTokens.Typography.intervention)
+                        .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text("Apple does not receive Drift's attention state. Drift does not upload it.")
+                        .font(DesignTokens.Typography.caption)
+                        .foregroundStyle(DesignTokens.ColorToken.quietText)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text("Apple Music is optional and only opens when you choose.")
+                        .font(DesignTokens.Typography.caption)
+                        .foregroundStyle(DesignTokens.ColorToken.quietText)
+                }
+            }
+        }
     }
 
     private var diagnosticsList: some View {
@@ -326,7 +626,7 @@ struct HUDView: View {
                     .font(DesignTokens.Typography.caption)
                     .foregroundStyle(DesignTokens.ColorToken.quietText)
             } else {
-                ForEach(viewModel.diagnosticEntries.prefix(5)) { entry in
+                ForEach(viewModel.diagnosticEntries.prefix(3)) { entry in
                     HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {
                         Text(entry.category.displayName)
                             .font(DesignTokens.Typography.caption)
@@ -441,7 +741,7 @@ struct HUDView: View {
                     }
                 }
 
-                capsuleButton("Test breathing cue") {
+                capsuleButton("Play breathing cue") {
                     viewModel.playBreathingCue()
                 }
             }
@@ -675,26 +975,108 @@ struct HUDView: View {
     }
 
     private var modePill: some View {
-        let statusColor = DesignTokens.ColorToken.telemetry(snapshot.telemetryStatus)
+        let sourceColor = rhythmSourceColor
 
-        return HStack(spacing: 6) {
-            Circle()
-                .fill(statusColor)
-                .frame(width: 6, height: 6)
+        return Button {
+            isShowingModeChooser.toggle()
+        } label: {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(sourceColor)
+                    .frame(width: 6, height: 6)
 
-            Text(snapshot.telemetryStatus.displayName)
-                .font(DesignTokens.Typography.caption)
-                .foregroundStyle(statusColor)
-                .lineLimit(1)
+                Text(rhythmSourceLabel)
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(sourceColor)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(sourceColor.opacity(0.09))
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(sourceColor.opacity(0.24), lineWidth: 1)
+            )
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
-        .background(statusColor.opacity(0.09))
-        .clipShape(Capsule())
-        .overlay(
-            Capsule()
-                .stroke(statusColor.opacity(0.24), lineWidth: 1)
-        )
+        .buttonStyle(.plain)
+        .help("Switch rhythm source")
+        .popover(isPresented: $isShowingModeChooser, arrowEdge: .top) {
+            modeChooser
+        }
+        .hudHoverLift(accent: sourceColor, scale: 1.0)
+    }
+
+    private var modeChooser: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+            modeChoiceButton(.liveApp)
+            modeChoiceButton(.mock)
+        }
+        .padding(DesignTokens.Spacing.sm)
+        .frame(width: 210)
+    }
+
+    private func modeChoiceButton(_ mode: TelemetryMode) -> some View {
+        let isSelected = viewModel.telemetryMode == mode
+        let sourceColor = rhythmSourceColor(for: mode)
+
+        return Button {
+            viewModel.setTelemetryMode(mode)
+            isShowingModeChooser = false
+        } label: {
+            HStack(alignment: .top, spacing: DesignTokens.Spacing.sm) {
+                Circle()
+                    .fill(sourceColor)
+                    .frame(width: 7, height: 7)
+                    .padding(.top, 5)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(rhythmSourceLabel(for: mode))
+                        .font(DesignTokens.Typography.metric)
+                        .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                        .lineLimit(1)
+
+                    Text(rhythmSourceDescription(for: mode))
+                        .font(DesignTokens.Typography.caption)
+                        .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: DesignTokens.Spacing.xs)
+
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(sourceColor)
+                        .padding(.top, 3)
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 7)
+            .background(isSelected ? sourceColor.opacity(0.10) : DesignTokens.ColorToken.panelBackground)
+            .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.innerCard, style: .continuous))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var expandButton: some View {
+        Button {
+            toggleExpanded()
+        } label: {
+            Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                .frame(width: 24, height: 24)
+                .background(DesignTokens.ColorToken.panelBackground)
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .strokeBorder(DesignTokens.ColorToken.quietBorder, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+        .help(isExpanded ? "Collapse" : "Expand")
+        .hudCircularHoverGlow(accent: accent)
     }
 
     private var glassOverlay: some View {
@@ -719,6 +1101,9 @@ struct HUDView: View {
 
         withTransaction(transaction) {
             isExpanded.toggle()
+            if !isExpanded {
+                isShowingLearnMore = false
+            }
         }
     }
 
@@ -731,6 +1116,71 @@ struct HUDView: View {
             withAnimation(.easeOut(duration: 0.24)) {
                 ringPulse = false
             }
+        }
+    }
+}
+
+private struct LearnMoreCopy {
+    let meaning: String
+    let science: String
+    let cue: String
+
+    static func copy(for state: AttentionState) -> LearnMoreCopy {
+        switch state {
+        case .focused:
+            return LearnMoreCopy(
+                meaning: "Your current rhythm looks steady.",
+                science: "Stable context and low switching often support sustained attention.",
+                cue: "Drift stays quiet when your rhythm is already working."
+            )
+        case .assistedDeepWork, .developmentLoop:
+            return LearnMoreCopy(
+                meaning: "You appear to be moving through a productive work loop.",
+                science: "Some switching is useful when tools support the same goal.",
+                cue: "Drift avoids treating purposeful tool-switching as distraction."
+            )
+        case .researchFlow:
+            return LearnMoreCopy(
+                meaning: "Your current rhythm looks steady.",
+                science: "Stable context and low switching often support sustained attention.",
+                cue: "Drift stays quiet when your rhythm is already working."
+            )
+        case .neutral:
+            return LearnMoreCopy(
+                meaning: "The signal looks mixed, so Drift stays light.",
+                science: "When context is unclear, quiet feedback is less distracting than a strong read.",
+                cue: "No strong suggestion right now."
+            )
+        case .passiveDrift:
+            return LearnMoreCopy(
+                meaning: "Your rhythm may be becoming more automatic.",
+                science: "Passive loops can reduce intentional control without feeling disruptive.",
+                cue: "A small intention can help you choose what comes next."
+            )
+        case .compulsiveDrift:
+            return LearnMoreCopy(
+                meaning: "The interaction pattern looks sticky or repetitive.",
+                science: "Fast repeated loops can make stopping harder even when nothing is wrong.",
+                cue: "A softer pause creates space without forcing you to stop."
+            )
+        case .overloaded:
+            return LearnMoreCopy(
+                meaning: "Your digital rhythm looks crowded.",
+                science: "High switching and weak context can increase cognitive load.",
+                cue: "A breathing cue can lower stimulation before the next action."
+            )
+        case .idlePaused:
+            return LearnMoreCopy(
+                meaning: "You seem paused or between states.",
+                science: "Transitions are useful moments to choose direction.",
+                cue: "Drift can help you re-enter gently."
+            )
+        case .unknown:
+            return LearnMoreCopy(
+                meaning: "Drift does not have enough signal yet.",
+                science: "It is better to stay quiet than over-interpret weak data.",
+                cue: "No strong suggestion right now."
+            )
         }
     }
 }

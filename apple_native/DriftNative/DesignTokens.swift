@@ -2,19 +2,21 @@ import SwiftUI
 
 enum DesignTokens {
     enum ColorToken {
-        static let appBackground = Color(red: 0.025, green: 0.030, blue: 0.036)
-        static let glassBackground = Color.white.opacity(0.08)
-        static let panelBackground = Color.white.opacity(0.055)
-        static let elevatedPanelBackground = Color.white.opacity(0.085)
-        static let liquidGlassTop = Color.white.opacity(0.15)
-        static let liquidGlassBottom = Color.black.opacity(0.10)
-        static let innerHighlight = Color.white.opacity(0.18)
-        static let glassBorder = Color.white.opacity(0.16)
+        static let appBackground = Color(red: 0.075, green: 0.082, blue: 0.092)
+        static let glassBackground = Color.white.opacity(0.10)
+        static let panelBackground = Color.white.opacity(0.065)
+        static let elevatedPanelBackground = Color.white.opacity(0.095)
+        static let liquidGlassTop = Color.white.opacity(0.19)
+        static let liquidGlassBottom = Color.black.opacity(0.08)
+        static let innerHighlight = Color.white.opacity(0.22)
+        static let glassBorder = Color.white.opacity(0.18)
         static let quietBorder = Color.white.opacity(0.08)
         static let ringTrack = Color.white.opacity(0.12)
         static let primaryText = Color(red: 0.94, green: 0.97, blue: 0.98)
         static let secondaryText = Color(red: 0.66, green: 0.71, blue: 0.75)
         static let quietText = Color(red: 0.50, green: 0.55, blue: 0.60)
+        static let previewMode = Color(red: 0.54, green: 0.48, blue: 1.00)
+        static let nowMode = Color(red: 0.35, green: 0.82, blue: 0.65)
 
         static func state(_ state: AttentionState) -> Color {
             switch state {
@@ -89,27 +91,27 @@ enum DesignTokens {
     }
 
     enum Radius {
-        static let card: CGFloat = 22
-        static let innerCard: CGFloat = 14
+        static let card: CGFloat = 20
+        static let innerCard: CGFloat = 13
         static let pill: CGFloat = 12
     }
 
     enum Layout {
-        static let hudMinWidth: CGFloat = 320
-        static let hudIdealWidth: CGFloat = 360
-        static let hudMaxWidth: CGFloat = 420
-        static let hudMinHeight: CGFloat = 330
-        static let hudIdealHeight: CGFloat = 380
-        static let hudMaxHeight: CGFloat = 680
-        static let expandedDetailMaxHeight: CGFloat = 300
-        static let ringSize: CGFloat = 112
-        static let ringLineWidth: CGFloat = 11
+        static let hudMinWidth: CGFloat = 360
+        static let hudIdealWidth: CGFloat = 392
+        static let hudMaxWidth: CGFloat = 430
+        static let hudMinHeight: CGFloat = 228
+        static let hudIdealHeight: CGFloat = 268
+        static let hudMaxHeight: CGFloat = 640
+        static let expandedDetailMaxHeight: CGFloat = 336
+        static let ringSize: CGFloat = 94
+        static let ringLineWidth: CGFloat = 9
     }
 
     enum Typography {
-        static let appTitle = Font.system(size: 20, weight: .semibold, design: .rounded)
-        static let state = Font.system(size: 22, weight: .semibold, design: .rounded)
-        static let score = Font.system(size: 28, weight: .semibold, design: .rounded)
+        static let appTitle = Font.system(size: 18, weight: .semibold, design: .rounded)
+        static let state = Font.system(size: 20, weight: .semibold, design: .rounded)
+        static let score = Font.system(size: 25, weight: .semibold, design: .rounded)
         static let metric = Font.system(size: 13, weight: .medium, design: .rounded)
         static let caption = Font.system(size: 11, weight: .medium, design: .rounded)
         static let intervention = Font.system(size: 13, weight: .regular, design: .rounded)
