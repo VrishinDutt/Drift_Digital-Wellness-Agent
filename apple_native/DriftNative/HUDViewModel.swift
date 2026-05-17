@@ -36,7 +36,17 @@ final class HUDViewModel: ObservableObject {
     @Published private(set) var diagnosticEntries: [DriftLogEntry] = []
     @Published private(set) var soundscapePlaybackState: SoundscapePlaybackState = .idle
     @Published private(set) var currentSoundscapeMode: SoundscapeMode = .none
-    @Published private(set) var appleMusicAuthorizationState: AppleMusicAuthorizationState
+    @Published private(set) var appleMusicAuthorizationState: AppleMusicAuthorizationState = .unavailable
+    @Published private(set) var appleMusicStatusLabel = AppleMusicAuthorizationState.unavailable.displayName
+    @Published private(set) var appleMusicDetailMessage = "Apple Music support is not available in this environment. Local cues remain available."
+    @Published private(set) var isAppleMusicConnected = false
+    @Published private(set) var appleMusicIsAvailable = false
+    @Published private(set) var appleMusicLastErrorMessage: String?
+    @Published private(set) var appleMusicConnectionCapabilityLabel = "Unavailable"
+    @Published private(set) var appleMusicPlaybackStatusLabel = "Planned"
+    @Published private(set) var appleMusicLocalCuesStatusLabel = "Available"
+    @Published private(set) var appleMusicSubscriptionStatusLabel = AppleMusicSubscriptionStatus.notChecked.displayName
+    @Published private(set) var appleMusicPermissionStatusLabel: String?
 
     private static let mockCycleInterval: TimeInterval = 4
     private static let livePollingInterval: TimeInterval = 2.5
@@ -83,11 +93,11 @@ final class HUDViewModel: ObservableObject {
         self.soundscapePlayer = soundscapePlayer
         self.appleMusicProvider = appleMusicProvider
         self.logger = logger
-        self.appleMusicAuthorizationState = appleMusicProvider.currentAuthorizationState
         let safeIndex = mockTelemetryProvider.normalizedIndex(initialIndex)
         self.currentIndex = safeIndex
         self.snapshot = mockTelemetryProvider.snapshot(at: safeIndex)
         self.recentSamples = [Self.sample(from: snapshot)]
+        syncAppleMusicState(refreshAuthorization: true)
         log(.snapshot, "Initialized mock snapshot: \(snapshot.state.displayName)")
     }
 
@@ -183,11 +193,19 @@ final class HUDViewModel: ObservableObject {
     }
 
     var appleMusicAuthorizationStatus: String {
-        appleMusicAuthorizationState.displayName
+        appleMusicStatusLabel
     }
 
-    var appleMusicCalmCopy: String? {
-        appleMusicAuthorizationState.calmCopy
+    var appleMusicAvailabilityStatus: String {
+        appleMusicIsAvailable ? "Available" : "Unavailable"
+    }
+
+    var canRequestAppleMusicAuthorization: Bool {
+        appleMusicIsAvailable && appleMusicAuthorizationState == .notDetermined
+    }
+
+    var canOpenMusicApp: Bool {
+        isAppleMusicConnected
     }
 
     var compactInterventionLine: String {
@@ -331,9 +349,36 @@ final class HUDViewModel: ObservableObject {
     }
 
     func requestAppleMusicAuthorization() async {
+        guard canRequestAppleMusicAuthorization else {
+            await checkAppleMusicStatus()
+            return
+        }
+
         let state = await appleMusicProvider.requestAuthorization()
-        appleMusicAuthorizationState = state
+        syncAppleMusicState()
         log(.soundscape, "Apple Music authorization: \(state.displayName)")
+    }
+
+    func checkAppleMusicStatus() async {
+        let state = await appleMusicProvider.refreshConnectionState()
+        syncAppleMusicState()
+        log(.soundscape, "Apple Music status checked: \(state.displayName)")
+    }
+
+    func openMusicApp() async {
+        guard canOpenMusicApp else {
+            await checkAppleMusicStatus()
+            return
+        }
+
+        let didOpen = await appleMusicProvider.openMusicApp()
+        syncAppleMusicState()
+
+        if didOpen {
+            log(.soundscape, "User opened Music app")
+        } else {
+            log(.soundscape, "Music app handoff unavailable")
+        }
     }
 
     deinit {
@@ -460,6 +505,24 @@ final class HUDViewModel: ObservableObject {
         case .failed(let mode, let message):
             log(.soundscape, "\(mode.displayName): \(message)")
         }
+    }
+
+    private func syncAppleMusicState(refreshAuthorization: Bool = false) {
+        if refreshAuthorization {
+            appleMusicProvider.refreshAuthorizationState()
+        }
+
+        appleMusicAuthorizationState = appleMusicProvider.authorizationState
+        appleMusicStatusLabel = appleMusicProvider.statusLabel
+        appleMusicDetailMessage = appleMusicProvider.detailMessage
+        isAppleMusicConnected = appleMusicProvider.isAuthorized
+        appleMusicIsAvailable = appleMusicProvider.isAvailable
+        appleMusicLastErrorMessage = appleMusicProvider.lastErrorMessage
+        appleMusicConnectionCapabilityLabel = appleMusicProvider.connectionCapabilityLabel
+        appleMusicPlaybackStatusLabel = appleMusicProvider.playbackStatusLabel
+        appleMusicLocalCuesStatusLabel = appleMusicProvider.localCuesStatusLabel
+        appleMusicSubscriptionStatusLabel = appleMusicProvider.subscriptionStatus.displayName
+        appleMusicPermissionStatusLabel = appleMusicProvider.permissionStatusLabel
     }
 
     private func advanceBreathingCue() {

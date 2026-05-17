@@ -460,25 +460,80 @@ struct HUDView: View {
 
     private var appleMusicDetail: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
-            detailRow("Apple Music", viewModel.appleMusicAuthorizationStatus)
+            Text("Apple Music: \(viewModel.appleMusicStatusLabel)")
+                .font(DesignTokens.Typography.metric)
+                .foregroundStyle(DesignTokens.ColorToken.primaryText)
+                .lineLimit(1)
+                .truncationMode(.tail)
 
-            if let calmCopy = viewModel.appleMusicCalmCopy {
-                Text(calmCopy)
-                    .font(DesignTokens.Typography.intervention)
-                    .foregroundStyle(DesignTokens.ColorToken.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            Text(viewModel.appleMusicDetailMessage)
+                .font(DesignTokens.Typography.intervention)
+                .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
 
-            capsuleButton(
-                "Enable Apple Music",
-                isDisabled: viewModel.appleMusicAuthorizationState == .authorized
-                    || viewModel.appleMusicAuthorizationState == .restricted
-                    || viewModel.appleMusicAuthorizationState == .unavailable
-            ) {
-                Task {
-                    await viewModel.requestAppleMusicAuthorization()
+            VStack(spacing: DesignTokens.Spacing.xs) {
+                appleMusicStatusLine("Connection", viewModel.appleMusicConnectionCapabilityLabel)
+                appleMusicStatusLine("Playback", viewModel.appleMusicPlaybackStatusLabel)
+                appleMusicStatusLine("Local cues", viewModel.appleMusicLocalCuesStatusLabel)
+                appleMusicStatusLine("Subscription", viewModel.appleMusicSubscriptionStatusLabel)
+
+                if let permissionStatus = viewModel.appleMusicPermissionStatusLabel {
+                    appleMusicStatusLine("Permission", permissionStatus)
                 }
             }
+
+            HStack(spacing: DesignTokens.Spacing.xs) {
+                if viewModel.canRequestAppleMusicAuthorization {
+                    capsuleButton("Enable Apple Music") {
+                        Task {
+                            await viewModel.requestAppleMusicAuthorization()
+                        }
+                    }
+                }
+
+                if viewModel.isAppleMusicConnected {
+                    capsuleButton("Check Status") {
+                        Task {
+                            await viewModel.checkAppleMusicStatus()
+                        }
+                    }
+
+                    capsuleButton("Open Music") {
+                        Task {
+                            await viewModel.openMusicApp()
+                        }
+                    }
+                } else if !viewModel.canRequestAppleMusicAuthorization {
+                    capsuleButton("Check Status") {
+                        Task {
+                            await viewModel.checkAppleMusicStatus()
+                        }
+                    }
+                }
+            }
+
+            if let lastErrorMessage = viewModel.appleMusicLastErrorMessage {
+                Text(lastErrorMessage)
+                    .font(DesignTokens.Typography.caption)
+                    .foregroundStyle(DesignTokens.ColorToken.quietText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func appleMusicStatusLine(_ label: String, _ value: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: DesignTokens.Spacing.sm) {
+            Text(label)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.quietText)
+                .frame(width: 84, alignment: .leading)
+
+            Text(value)
+                .font(DesignTokens.Typography.caption)
+                .foregroundStyle(DesignTokens.ColorToken.secondaryText)
+                .lineLimit(1)
+
+            Spacer(minLength: 0)
         }
     }
 
