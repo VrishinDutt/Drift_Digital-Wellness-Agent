@@ -2,19 +2,23 @@ import SwiftUI
 
 enum DesignTokens {
     enum ColorToken {
-        static let appBackground = Color(red: 0.075, green: 0.082, blue: 0.092)
-        static let glassBackground = Color.white.opacity(0.10)
-        static let panelBackground = Color.white.opacity(0.065)
-        static let elevatedPanelBackground = Color.white.opacity(0.095)
-        static let liquidGlassTop = Color.white.opacity(0.19)
-        static let liquidGlassBottom = Color.black.opacity(0.08)
-        static let innerHighlight = Color.white.opacity(0.22)
-        static let glassBorder = Color.white.opacity(0.18)
-        static let quietBorder = Color.white.opacity(0.08)
-        static let ringTrack = Color.white.opacity(0.12)
-        static let primaryText = Color(red: 0.94, green: 0.97, blue: 0.98)
-        static let secondaryText = Color(red: 0.66, green: 0.71, blue: 0.75)
-        static let quietText = Color(red: 0.50, green: 0.55, blue: 0.60)
+        static let appBackground = Color(red: 0.12, green: 0.13, blue: 0.14)
+        static let glassBackground = Color.white.opacity(0.13)
+        static let panelBackground = Color.white.opacity(0.070)
+        static let elevatedPanelBackground = Color.white.opacity(0.11)
+        static let glassSheen = Color.white.opacity(0.28)
+        static let glassReflection = Color.white.opacity(0.10)
+        static let liquidGlassTop = Color.white.opacity(0.24)
+        static let liquidGlassMid = Color.white.opacity(0.075)
+        static let liquidGlassBottom = Color.black.opacity(0.10)
+        static let innerHighlight = Color.white.opacity(0.28)
+        static let glassBorder = Color.white.opacity(0.20)
+        static let quietBorder = Color.white.opacity(0.095)
+        static let hairlineBorder = Color.white.opacity(0.055)
+        static let ringTrack = Color.white.opacity(0.13)
+        static let primaryText = Color(red: 0.94, green: 0.965, blue: 0.98)
+        static let secondaryText = Color(red: 0.69, green: 0.73, blue: 0.76)
+        static let quietText = Color(red: 0.52, green: 0.56, blue: 0.60)
         static let previewMode = Color(red: 0.54, green: 0.48, blue: 1.00)
         static let nowMode = Color(red: 0.35, green: 0.82, blue: 0.65)
 
@@ -91,29 +95,30 @@ enum DesignTokens {
     }
 
     enum Radius {
-        static let card: CGFloat = 20
-        static let innerCard: CGFloat = 13
+        static let card: CGFloat = 22
+        static let innerCard: CGFloat = 14
         static let pill: CGFloat = 12
     }
 
     enum Layout {
-        static let hudMinWidth: CGFloat = 360
-        static let hudIdealWidth: CGFloat = 392
-        static let hudMaxWidth: CGFloat = 430
-        static let hudMinHeight: CGFloat = 228
-        static let hudIdealHeight: CGFloat = 268
+        static let hudMinWidth: CGFloat = 368
+        static let hudIdealWidth: CGFloat = 398
+        static let hudMaxWidth: CGFloat = 424
+        static let hudMinHeight: CGFloat = 220
+        static let hudIdealHeight: CGFloat = 252
         static let hudMaxHeight: CGFloat = 640
-        static let expandedDetailMaxHeight: CGFloat = 336
-        static let ringSize: CGFloat = 94
-        static let ringLineWidth: CGFloat = 9
+        static let expandedDetailMaxHeight: CGFloat = 348
+        static let ringSize: CGFloat = 88
+        static let ringLineWidth: CGFloat = 8
     }
 
     enum Typography {
         static let appTitle = Font.system(size: 18, weight: .semibold, design: .rounded)
-        static let state = Font.system(size: 20, weight: .semibold, design: .rounded)
-        static let score = Font.system(size: 25, weight: .semibold, design: .rounded)
+        static let state = Font.system(size: 21, weight: .semibold, design: .rounded)
+        static let score = Font.system(size: 26, weight: .semibold, design: .rounded)
         static let metric = Font.system(size: 13, weight: .medium, design: .rounded)
-        static let caption = Font.system(size: 11, weight: .medium, design: .rounded)
-        static let intervention = Font.system(size: 13, weight: .regular, design: .rounded)
+        static let caption = Font.system(size: 11.5, weight: .medium, design: .rounded)
+        static let micro = Font.system(size: 10.5, weight: .medium, design: .rounded)
+        static let intervention = Font.system(size: 12.5, weight: .regular, design: .rounded)
     }
 }

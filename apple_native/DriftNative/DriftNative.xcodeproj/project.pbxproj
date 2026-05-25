@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		81BD57D32FB9D000003985C3 /* AppleMusicProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57D42FB9D000003985C3 /* AppleMusicProvider.swift */; };
+		81BD57D62FBA1000003985C3 /* VisualAmbience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57D52FBA1000003985C3 /* VisualAmbience.swift */; };
 		81BD57B82FB768A5003985C3 /* BehaviorEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57AE2FB768A5003985C3 /* BehaviorEngine.swift */; };
 		81BD57CA2FB9A000003985C3 /* CognitiveRhythmLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57CB2FB9A000003985C3 /* CognitiveRhythmLayer.swift */; };
 		81BD57B92FB768A5003985C3 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57B12FB768A5003985C3 /* DesignTokens.swift */; };
@@ -64,6 +65,7 @@
 		81BD57C72FB8C000003985C3 /* NativeTelemetryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeTelemetryProvider.swift; sourceTree = "<group>"; };
 		81BD57B72FB768A5003985C3 /* ReasoningEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReasoningEngine.swift; sourceTree = "<group>"; };
 		81BD57CF2FB9B000003985C3 /* SoundscapeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundscapeMode.swift; sourceTree = "<group>"; };
+		81BD57D52FBA1000003985C3 /* VisualAmbience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualAmbience.swift; sourceTree = "<group>"; };
 		81BD57D12FB9C000003985C3 /* breathing_cue.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = breathing_cue.wav; sourceTree = "<group>"; };
 		81BD57C32FB768AA003985C3 /* DriftNative-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DriftNative-Bridging-Header.h"; sourceTree = "<group>"; };
 		81E31E0A2FB761450091AE30 /* DriftNative.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DriftNative.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -135,6 +137,7 @@
 				81BD57C72FB8C000003985C3 /* NativeTelemetryProvider.swift */,
 				81BD57B72FB768A5003985C3 /* ReasoningEngine.swift */,
 				81BD57CF2FB9B000003985C3 /* SoundscapeMode.swift */,
+				81BD57D52FBA1000003985C3 /* VisualAmbience.swift */,
 				81E31E0C2FB761450091AE30 /* DriftNative */,
 				81E31E1C2FB761470091AE30 /* DriftNativeTests */,
 				81E31E262FB761470091AE30 /* DriftNativeUITests */,
@@ -322,6 +325,7 @@
 				81BD57C62FB8C000003985C3 /* NativeTelemetryProvider.swift in Sources */,
 				81BD57BE2FB768A5003985C3 /* ContextClassifier.swift in Sources */,
 				81BD57CE2FB9B000003985C3 /* SoundscapeMode.swift in Sources */,
+				81BD57D62FBA1000003985C3 /* VisualAmbience.swift in Sources */,
 				81BD57BF2FB768A5003985C3 /* AttentionSnapshot.swift in Sources */,
 				81BD57C02FB768A5003985C3 /* MockTelemetryProvider.swift in Sources */,
 				81BD57C12FB768A5003985C3 /* ContentView.swift in Sources */,

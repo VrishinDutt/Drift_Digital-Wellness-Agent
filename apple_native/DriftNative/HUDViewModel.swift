@@ -47,6 +47,10 @@ final class HUDViewModel: ObservableObject {
     @Published private(set) var appleMusicLocalCuesStatusLabel = "Available"
     @Published private(set) var appleMusicSubscriptionStatusLabel = AppleMusicSubscriptionStatus.notChecked.displayName
     @Published private(set) var appleMusicPermissionStatusLabel: String?
+    @Published private(set) var recommendedAmbiencePreset: VisualAmbiencePreset
+    @Published private(set) var selectedAmbiencePreset: VisualAmbiencePreset?
+    @Published private(set) var ambienceRecommendationReason: String
+    @Published private(set) var ambienceApplyMessage: String?
 
     private static let mockCycleInterval: TimeInterval = 4
     private static let livePollingInterval: TimeInterval = 2.5
@@ -58,6 +62,8 @@ final class HUDViewModel: ObservableObject {
     private let behaviorEngine: BehaviorEngine
     private let soundscapePlayer: LocalSoundscapePlayer
     private let appleMusicProvider: AppleMusicProvider
+    private let visualAmbienceEngine: VisualAmbienceEngine
+    private let visualAmbienceManager: VisualAmbienceManager
     private let logger: DriftLogger
     private let maxSamples = 20
     private var currentIndex: Int
@@ -73,6 +79,8 @@ final class HUDViewModel: ObservableObject {
             behaviorEngine: BehaviorEngine(),
             soundscapePlayer: LocalSoundscapePlayer(),
             appleMusicProvider: AppleMusicProvider(),
+            visualAmbienceEngine: VisualAmbienceEngine(),
+            visualAmbienceManager: VisualAmbienceManager(),
             logger: DriftLogger(),
             initialIndex: initialIndex
         )
@@ -84,6 +92,8 @@ final class HUDViewModel: ObservableObject {
         behaviorEngine: BehaviorEngine,
         soundscapePlayer: LocalSoundscapePlayer,
         appleMusicProvider: AppleMusicProvider,
+        visualAmbienceEngine: VisualAmbienceEngine,
+        visualAmbienceManager: VisualAmbienceManager,
         logger: DriftLogger,
         initialIndex: Int = 0
     ) {
@@ -92,13 +102,23 @@ final class HUDViewModel: ObservableObject {
         self.behaviorEngine = behaviorEngine
         self.soundscapePlayer = soundscapePlayer
         self.appleMusicProvider = appleMusicProvider
+        self.visualAmbienceEngine = visualAmbienceEngine
+        self.visualAmbienceManager = visualAmbienceManager
         self.logger = logger
         let safeIndex = mockTelemetryProvider.normalizedIndex(initialIndex)
+        let initialSnapshot = mockTelemetryProvider.snapshot(at: safeIndex)
+        let initialAmbienceRecommendation = visualAmbienceEngine.recommendation(for: initialSnapshot)
         self.currentIndex = safeIndex
-        self.snapshot = mockTelemetryProvider.snapshot(at: safeIndex)
+        self.snapshot = initialSnapshot
+        self.recommendedAmbiencePreset = initialAmbienceRecommendation.preset
+        self.ambienceRecommendationReason = initialAmbienceRecommendation.rationale
+        self.ambienceApplyMessage = visualAmbienceManager.assetUnavailableMessage(
+            for: initialAmbienceRecommendation.preset
+        )
         self.recentSamples = [Self.sample(from: snapshot)]
         syncAppleMusicState(refreshAuthorization: true)
         log(.snapshot, "Initialized mock snapshot: \(snapshot.state.displayName)")
+        log(.ambience, "Ambience suggested: \(recommendedAmbiencePreset.title)")
     }
 
     var recentSignal: [TelemetrySample] {
@@ -190,6 +210,28 @@ final class HUDViewModel: ObservableObject {
 
     var soundscapePlaybackStatus: String {
         soundscapePlaybackState.displayName
+    }
+
+    var visibleAmbiencePresets: [VisualAmbiencePreset] {
+        guard let selectedAmbiencePreset else {
+            return visualAmbienceEngine.visiblePresets(for: snapshot)
+        }
+
+        return uniqueAmbiencePresets(
+            [selectedAmbiencePreset] + visualAmbienceEngine.visiblePresets(for: snapshot)
+        )
+    }
+
+    var ambienceStatusMessage: String? {
+        ambienceApplyMessage ?? visualAmbienceManager.assetUnavailableMessage(for: ambiencePreviewPreset)
+    }
+
+    var canApplyAmbience: Bool {
+        selectedAmbiencePreset != nil
+    }
+
+    private var ambiencePreviewPreset: VisualAmbiencePreset {
+        selectedAmbiencePreset ?? recommendedAmbiencePreset
     }
 
     var appleMusicAuthorizationStatus: String {
@@ -348,6 +390,31 @@ final class HUDViewModel: ObservableObject {
         )
     }
 
+    func selectAmbiencePreset(_ preset: VisualAmbiencePreset) {
+        selectedAmbiencePreset = preset
+        ambienceApplyMessage = visualAmbienceManager.assetUnavailableMessage(for: preset)
+        log(.ambience, "Ambience selected: \(preset.title)")
+    }
+
+    func applyAmbience() {
+        guard let selectedAmbiencePreset else {
+            return
+        }
+
+        log(.ambience, "Ambience apply requested: \(selectedAmbiencePreset.title)")
+        let result = visualAmbienceManager.applyPreset(selectedAmbiencePreset)
+        ambienceApplyMessage = result.message
+
+        switch result {
+        case .applied:
+            log(.ambience, "Ambience applied: \(selectedAmbiencePreset.title)")
+        case .previewOnly:
+            log(.ambience, "Ambience preview only: \(selectedAmbiencePreset.title)")
+        case .failed:
+            log(.ambience, "Ambience apply failed: \(selectedAmbiencePreset.title)")
+        }
+    }
+
     func requestAppleMusicAuthorization() async {
         guard canRequestAppleMusicAuthorization else {
             await checkAppleMusicStatus()
@@ -466,7 +533,9 @@ final class HUDViewModel: ObservableObject {
     private func applySnapshot(_ newSnapshot: AttentionSnapshot) {
         let previousIntervention = snapshot.intervention
         let previousRhythmPlan = snapshot.rhythmPlan
+        let previousAmbiencePreset = recommendedAmbiencePreset
         snapshot = newSnapshot
+        updateAmbienceRecommendation(for: newSnapshot, previousPreset: previousAmbiencePreset)
         log(
             .snapshot,
             "Snapshot updated: \(newSnapshot.state.displayName), drift \(newSnapshot.driftScore)"
@@ -478,6 +547,23 @@ final class HUDViewModel: ObservableObject {
 
         if newSnapshot.intervention != previousIntervention {
             resetInterventionUI()
+        }
+    }
+
+    private func updateAmbienceRecommendation(
+        for snapshot: AttentionSnapshot,
+        previousPreset: VisualAmbiencePreset
+    ) {
+        let recommendation = visualAmbienceEngine.recommendation(for: snapshot)
+        recommendedAmbiencePreset = recommendation.preset
+        ambienceRecommendationReason = recommendation.rationale
+
+        if selectedAmbiencePreset == nil {
+            ambienceApplyMessage = visualAmbienceManager.assetUnavailableMessage(for: recommendation.preset)
+        }
+
+        if recommendation.preset != previousPreset {
+            log(.ambience, "Ambience suggested: \(recommendation.preset.title)")
         }
     }
 
@@ -551,6 +637,22 @@ final class HUDViewModel: ObservableObject {
         let interval = sample.timestamp.timeIntervalSince(latest.timestamp)
 
         return isSameApp && isSameBundle && interval < Self.duplicateSampleWindow
+    }
+
+    private func uniqueAmbiencePresets(_ presets: [VisualAmbiencePreset]) -> [VisualAmbiencePreset] {
+        var seen: [String] = []
+        var unique: [VisualAmbiencePreset] = []
+
+        for preset in presets where !seen.contains(preset.id) {
+            seen.append(preset.id)
+            unique.append(preset)
+
+            if unique.count == 4 {
+                break
+            }
+        }
+
+        return unique
     }
 
     private func log(_ category: DriftLogCategory, _ message: String) {

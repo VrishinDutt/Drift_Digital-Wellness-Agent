@@ -7,6 +7,7 @@ enum DriftLogCategory: String, Equatable {
     case intervention
     case rhythm
     case soundscape
+    case ambience
     case buffer
 
     var displayName: String {
@@ -23,6 +24,8 @@ enum DriftLogCategory: String, Equatable {
             return "Rhythm"
         case .soundscape:
             return "Soundscape"
+        case .ambience:
+            return "Ambience"
         case .buffer:
             return "Buffer"
         }
