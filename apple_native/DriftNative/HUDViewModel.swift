@@ -19,9 +19,55 @@ enum TelemetryMode: String, CaseIterable, Identifiable {
     }
 }
 
-enum BreathingPhase: String {
-    case inhale = "Inhale"
-    case exhale = "Exhale"
+enum BreathingPhase: CaseIterable, Equatable {
+    case inhale
+    case hold
+    case exhale
+    case rest
+
+    var displayText: String {
+        switch self {
+        case .inhale:
+            return "Breathe in"
+        case .hold:
+            return "Hold"
+        case .exhale:
+            return "Breathe out"
+        case .rest:
+            return "Rest"
+        }
+    }
+
+    var duration: TimeInterval {
+        switch self {
+        case .inhale:
+            return 4
+        case .hold:
+            return 2
+        case .exhale:
+            return 6
+        case .rest:
+            return 2
+        }
+    }
+
+    var next: BreathingPhase {
+        switch self {
+        case .inhale:
+            return .hold
+        case .hold:
+            return .exhale
+        case .exhale:
+            return .rest
+        case .rest:
+            return .inhale
+        }
+    }
+}
+
+private enum BreathingOrbSource {
+    case suggested
+    case manual
 }
 
 @MainActor
@@ -54,7 +100,6 @@ final class HUDViewModel: ObservableObject {
 
     private static let mockCycleInterval: TimeInterval = 4
     private static let livePollingInterval: TimeInterval = 2.5
-    private static let breathingPhaseInterval: TimeInterval = 2.8
     private static let duplicateSampleWindow: TimeInterval = 7
 
     private let mockTelemetryProvider: MockTelemetryProvider
@@ -70,7 +115,8 @@ final class HUDViewModel: ObservableObject {
     private var mockCycleTimer: Timer?
     private var liveTelemetryTimer: Timer?
     private var breathingTimer: Timer?
-    private var breathingStepsRemaining = 0
+    private var breathingOrbSource: BreathingOrbSource?
+    private var dismissedBreathingSuggestionID: UUID?
 
     convenience init(initialIndex: Int = 0) {
         self.init(
@@ -256,10 +302,14 @@ final class HUDViewModel: ObservableObject {
         }
 
         if isBreathingResetActive {
-            return breathingPhase.rawValue
+            return "Breathing reset"
         }
 
         return snapshot.intervention.message
+    }
+
+    var shouldSuggestBreathingOrb: Bool {
+        snapshot.intervention.kind == .breathingReset || snapshot.state == .overloaded
     }
 
     func advanceSnapshot() {
@@ -317,7 +367,7 @@ final class HUDViewModel: ObservableObject {
     func stopAllTimers() {
         stopMockCycle()
         stopLiveTelemetry()
-        dismissBreathingReset()
+        closeBreathingOrb(shouldLog: false)
         stopSoundscape()
     }
 
@@ -327,35 +377,71 @@ final class HUDViewModel: ObservableObject {
         }
 
         selectedIntention = choice
-        dismissBreathingReset()
+        closeBreathingOrb(shouldLog: false)
         log(.intervention, "Intention set: \(choice)")
     }
 
     func startBreathingReset() {
-        guard snapshot.intervention.kind == .breathingReset else {
+        openBreathingOrb(source: .manual)
+    }
+
+    func openSuggestedBreathingOrbIfNeeded() {
+        guard shouldSuggestBreathingOrb else {
             return
         }
 
+        guard dismissedBreathingSuggestionID != snapshot.id else {
+            return
+        }
+
+        guard !isBreathingResetActive else {
+            return
+        }
+
+        openBreathingOrb(source: .suggested)
+    }
+
+    func dismissBreathingReset() {
+        closeBreathingOrb(shouldLog: true, markCurrentSuggestionDismissed: true)
+    }
+
+    private func openBreathingOrb(source: BreathingOrbSource) {
         breathingTimer?.invalidate()
         selectedIntention = nil
         isBreathingResetActive = true
+        breathingOrbSource = source
         breathingPhase = .inhale
-        breathingStepsRemaining = 4
-        log(.intervention, "Breathing cue started")
+        log(.intervention, "Breathing orb opened")
+        scheduleNextBreathingPhase()
+    }
 
-        breathingTimer = Timer.scheduledTimer(withTimeInterval: Self.breathingPhaseInterval, repeats: true) { [weak self] _ in
+    private func scheduleNextBreathingPhase() {
+        breathingTimer?.invalidate()
+        breathingTimer = Timer.scheduledTimer(withTimeInterval: breathingPhase.duration, repeats: false) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.advanceBreathingCue()
             }
         }
     }
 
-    func dismissBreathingReset() {
+    private func closeBreathingOrb(
+        shouldLog: Bool,
+        markCurrentSuggestionDismissed: Bool = false
+    ) {
+        let wasActive = isBreathingResetActive
         breathingTimer?.invalidate()
         breathingTimer = nil
         isBreathingResetActive = false
+        breathingOrbSource = nil
         breathingPhase = .inhale
-        breathingStepsRemaining = 0
+
+        if markCurrentSuggestionDismissed, shouldSuggestBreathingOrb {
+            dismissedBreathingSuggestionID = snapshot.id
+        }
+
+        if shouldLog, wasActive {
+            log(.intervention, "Breathing orb dismissed")
+        }
     }
 
     func playSuggestedSoundscape() {
@@ -569,7 +655,10 @@ final class HUDViewModel: ObservableObject {
 
     private func resetInterventionUI() {
         selectedIntention = nil
-        dismissBreathingReset()
+
+        if breathingOrbSource == .suggested, !shouldSuggestBreathingOrb {
+            closeBreathingOrb(shouldLog: false)
+        }
     }
 
     private func applySoundscapeState(
@@ -612,19 +701,19 @@ final class HUDViewModel: ObservableObject {
     }
 
     private func advanceBreathingCue() {
-        guard breathingStepsRemaining > 0 else {
-            dismissBreathingReset()
+        guard isBreathingResetActive else {
+            closeBreathingOrb(shouldLog: false)
             return
         }
 
-        breathingPhase = breathingPhase == .inhale ? .exhale : .inhale
-        breathingStepsRemaining -= 1
+        let completedCycle = breathingPhase == .rest
+        breathingPhase = breathingPhase.next
 
-        if breathingStepsRemaining == 0 {
-            breathingTimer?.invalidate()
-            breathingTimer = nil
-            log(.intervention, "Breathing cue completed")
+        if completedCycle {
+            log(.intervention, "Breathing cycle completed")
         }
+
+        scheduleNextBreathingPhase()
     }
 
     private func shouldSkipDuplicate(_ sample: TelemetrySample) -> Bool {

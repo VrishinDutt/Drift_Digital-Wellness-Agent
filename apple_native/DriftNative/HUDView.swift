@@ -58,6 +58,10 @@ struct HUDView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .onChange(of: snapshot.id) { _, _ in
             triggerRingPulse()
+
+            if isExpanded {
+                viewModel.openSuggestedBreathingOrbIfNeeded()
+            }
         }
     }
 
@@ -423,6 +427,9 @@ struct HUDView: View {
         }
         .frame(maxHeight: DesignTokens.Layout.expandedDetailMaxHeight)
         .clipped()
+        .onAppear {
+            viewModel.openSuggestedBreathingOrbIfNeeded()
+        }
     }
 
     private var rhythmSourceDetail: some View {
@@ -879,9 +886,7 @@ struct HUDView: View {
                 }
             }
 
-            if intervention.kind == .breathingReset {
-                breathingResetControl
-            }
+            breathingResetControl
         }
     }
 
@@ -998,51 +1003,17 @@ struct HUDView: View {
     private var breathingResetControl: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.sm) {
             if viewModel.isBreathingResetActive {
-                HStack(spacing: DesignTokens.Spacing.md) {
-                    breathingCue
-
-                    Button {
-                        viewModel.dismissBreathingReset()
-                    } label: {
-                        Text("Dismiss")
-                    }
-                    .buttonStyle(.plain)
-                    .font(DesignTokens.Typography.caption)
-                    .foregroundStyle(DesignTokens.ColorToken.secondaryText)
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 6)
-                    .background(DesignTokens.ColorToken.panelBackground)
-                    .clipShape(Capsule())
-                    .hudHoverLift(accent: accent, scale: 1.02)
-                }
+                BreathingOrbView(
+                    phase: viewModel.breathingPhase,
+                    accent: accent,
+                    onDismiss: viewModel.dismissBreathingReset
+                )
             } else {
-                capsuleButton("Begin breathing cue") {
+                capsuleButton("Breathing reset") {
                     viewModel.startBreathingReset()
                 }
             }
         }
-    }
-
-    private var breathingCue: some View {
-        let progress: CGFloat = viewModel.breathingPhase == .inhale ? 0.82 : 0.42
-
-        return ZStack {
-            Circle()
-                .stroke(DesignTokens.ColorToken.ringTrack, lineWidth: 6)
-
-            Circle()
-                .trim(from: 0, to: progress)
-                .stroke(accent, style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .animation(.easeInOut(duration: 2.2), value: viewModel.breathingPhase)
-
-            Text(viewModel.breathingPhase.rawValue)
-                .font(DesignTokens.Typography.caption)
-                .foregroundStyle(DesignTokens.ColorToken.primaryText)
-        }
-        .frame(width: 72, height: 72)
-        .scaleEffect(viewModel.breathingPhase == .inhale ? 1.03 : 0.98)
-        .animation(.easeInOut(duration: 2.2), value: viewModel.breathingPhase)
     }
 
     private func capsuleButton(

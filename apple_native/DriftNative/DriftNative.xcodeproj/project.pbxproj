@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		81BD57D32FB9D000003985C3 /* AppleMusicProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57D42FB9D000003985C3 /* AppleMusicProvider.swift */; };
+		81BD57D82FBC4000003985C3 /* BreathingOrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57D72FBC4000003985C3 /* BreathingOrbView.swift */; };
 		81BD57D62FBA1000003985C3 /* VisualAmbience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57D52FBA1000003985C3 /* VisualAmbience.swift */; };
 		81BD57B82FB768A5003985C3 /* BehaviorEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57AE2FB768A5003985C3 /* BehaviorEngine.swift */; };
 		81BD57CA2FB9A000003985C3 /* CognitiveRhythmLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81BD57CB2FB9A000003985C3 /* CognitiveRhythmLayer.swift */; };
@@ -50,6 +51,7 @@
 		81BD57D42FB9D000003985C3 /* AppleMusicProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleMusicProvider.swift; sourceTree = "<group>"; };
 		81BD57AD2FB768A5003985C3 /* AttentionSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionSnapshot.swift; sourceTree = "<group>"; };
 		81BD57AE2FB768A5003985C3 /* BehaviorEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorEngine.swift; sourceTree = "<group>"; };
+		81BD57D72FBC4000003985C3 /* BreathingOrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreathingOrbView.swift; sourceTree = "<group>"; };
 		81BD57CB2FB9A000003985C3 /* CognitiveRhythmLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitiveRhythmLayer.swift; sourceTree = "<group>"; };
 		81BD57AF2FB768A5003985C3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		81BD57B02FB768A5003985C3 /* ContextClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextClassifier.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 				81BD57D42FB9D000003985C3 /* AppleMusicProvider.swift */,
 				81BD57AD2FB768A5003985C3 /* AttentionSnapshot.swift */,
 				81BD57AE2FB768A5003985C3 /* BehaviorEngine.swift */,
+				81BD57D72FBC4000003985C3 /* BreathingOrbView.swift */,
 				81BD57CB2FB9A000003985C3 /* CognitiveRhythmLayer.swift */,
 				81BD57AF2FB768A5003985C3 /* ContentView.swift */,
 				81BD57B02FB768A5003985C3 /* ContextClassifier.swift */,
@@ -313,6 +316,7 @@
 			files = (
 				81BD57D32FB9D000003985C3 /* AppleMusicProvider.swift in Sources */,
 				81BD57B82FB768A5003985C3 /* BehaviorEngine.swift in Sources */,
+				81BD57D82FBC4000003985C3 /* BreathingOrbView.swift in Sources */,
 				81BD57CA2FB9A000003985C3 /* CognitiveRhythmLayer.swift in Sources */,
 				81BD57B92FB768A5003985C3 /* DesignTokens.swift in Sources */,
 				81BD57BA2FB768A5003985C3 /* DriftAnalyzer.swift in Sources */,
