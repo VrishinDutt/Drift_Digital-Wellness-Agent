@@ -148,7 +148,10 @@ def analyze_data_points(logs):
             "page_text_collected",
             "keystrokes_collected",
             "screenshots_collected",
-            "clipboard_collected"
+            "screen_recording_collected",
+            "clipboard_collected",
+            "camera_collected",
+            "microphone_collected"
         ]:
             privacy_counter[f"{key}={privacy.get(key, False)}"] += 1
 

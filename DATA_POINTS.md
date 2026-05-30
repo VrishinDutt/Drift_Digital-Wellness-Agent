@@ -28,6 +28,9 @@ Each new row in `data/activity_log.json` uses JSON Lines format and includes:
 | `collector` | Identifies which module wrote the row | Debug metadata |
 | `deduplicated_samples` | Counts unchanged samples skipped before an emitted row | Derived |
 
+The active telemetry log rotates locally when it reaches the configured size
+cap. Recent runtime analysis only needs the bounded tail of the JSONL stream.
+
 ## Explicitly Excluded
 
 - Full URLs
@@ -37,6 +40,8 @@ Each new row in `data/activity_log.json` uses JSON Lines format and includes:
 - Keystrokes
 - Screenshots or screen recording
 - Clipboard contents
+- Camera input
+- Microphone input
 - File contents
 - Message contents
 

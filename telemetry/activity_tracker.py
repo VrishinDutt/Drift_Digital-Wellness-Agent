@@ -1,5 +1,7 @@
 import sys
 
+from telemetry.diagnostics import install_crash_handlers, log_exception
+
 
 def load_platform_tracker():
     try:
@@ -13,6 +15,11 @@ def load_platform_tracker():
 
             return windows_tracker
     except ImportError as error:
+        log_exception(
+            "platform_tracker_import_failed",
+            error,
+            logger_name="telemetry"
+        )
         print(
             "Platform telemetry dependencies are unavailable; "
             f"using fallback tracker. ({error.__class__.__name__}: {error})",
@@ -37,6 +44,7 @@ def get_active_window(*args, **kwargs):
 
 
 def main():
+    install_crash_handlers()
     load_platform_tracker().main()
 
 

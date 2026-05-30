@@ -5,8 +5,10 @@ import copy
 import io
 from datetime import datetime
 
+from telemetry.diagnostics import log_exception
+
 MISSING_PYSIDE6_MESSAGE = (
-    "PySide6 is not installed. Run: pip install -r requirements.txt"
+    "PySide6 is not installed. Run: python -m pip install -r requirements.txt"
 )
 
 try:
@@ -214,6 +216,11 @@ if PYSIDE6_AVAILABLE:
                 self.signals.snapshot_ready.emit(snapshot)
                 self.signals.timeline_ready.emit(timeline)
             except Exception as exc:
+                log_exception(
+                    "desktop_analysis_worker_failed",
+                    exc,
+                    logger_name="desktop"
+                )
                 self.signals.error_raised.emit(str(exc))
             finally:
                 self.signals.finished.emit()
@@ -251,6 +258,11 @@ if PYSIDE6_AVAILABLE:
                 runtime.start_tracker(interval=1, quiet=True)
                 self.telemetry_running = runtime.tracker_is_running()
             except Exception as exc:
+                log_exception(
+                    "desktop_tracker_start_failed",
+                    exc,
+                    logger_name="desktop"
+                )
                 self.telemetry_running = False
                 self.error_raised.emit(str(exc))
 
@@ -334,6 +346,11 @@ if PYSIDE6_AVAILABLE:
 
                 runtime.stop_tracker()
             except Exception as exc:
+                log_exception(
+                    "desktop_tracker_stop_failed",
+                    exc,
+                    logger_name="desktop"
+                )
                 self.error_raised.emit(str(exc))
 
         def _emit_status(self):

@@ -14,8 +14,34 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from agent.main_agent import run_agent
+from telemetry.diagnostics import get_logger, install_crash_handlers
 
 TRACKER_PROCESS = None
+
+
+def build_tracker_popen_kwargs(quiet):
+    kwargs = {
+        "cwd": PROJECT_ROOT,
+        "stdin": subprocess.DEVNULL,
+    }
+
+    if quiet:
+        kwargs["stdout"] = subprocess.DEVNULL
+        kwargs["stderr"] = subprocess.DEVNULL
+
+    if sys.platform.startswith("win") and quiet:
+        creationflags = 0
+
+        if hasattr(subprocess, "CREATE_NO_WINDOW"):
+            creationflags |= subprocess.CREATE_NO_WINDOW
+
+        if hasattr(subprocess, "CREATE_NEW_PROCESS_GROUP"):
+            creationflags |= subprocess.CREATE_NEW_PROCESS_GROUP
+
+        if creationflags:
+            kwargs["creationflags"] = creationflags
+
+    return kwargs
 
 
 def start_tracker(interval=1, quiet=True):
@@ -35,9 +61,10 @@ def start_tracker(interval=1, quiet=True):
     if quiet:
         command.append("--quiet")
 
+    get_logger("runtime").info("starting_telemetry_tracker")
     TRACKER_PROCESS = subprocess.Popen(
         command,
-        cwd=PROJECT_ROOT
+        **build_tracker_popen_kwargs(quiet)
     )
 
     return TRACKER_PROCESS
@@ -64,6 +91,10 @@ def ensure_tracker(interval=1, auto_restart=True):
     exit_code = tracker_exit_code()
 
     if exit_code is not None:
+        get_logger("runtime").warning(
+            "telemetry_tracker_exited code=%s",
+            exit_code
+        )
         print(
             "\nTelemetry tracker exited "
             f"with code {exit_code}."
@@ -81,6 +112,7 @@ def stop_tracker():
         return
 
     if TRACKER_PROCESS.poll() is None:
+        get_logger("runtime").info("stopping_telemetry_tracker")
         TRACKER_PROCESS.terminate()
 
         try:
@@ -133,6 +165,8 @@ def runtime_loop(
 
 
 def main():
+    install_crash_handlers()
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--analysis-interval",

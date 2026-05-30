@@ -77,7 +77,8 @@ macOS telemetry uses Quartz window metadata and NSWorkspace. Browser semantic ti
 ```powershell
 python -m venv venv
 venv\Scripts\activate
-pip install -r requirements-windows.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements-windows.txt
 ```
 
 Run the Windows smoke-test path:
@@ -96,7 +97,15 @@ Windows telemetry uses `pywin32` and `psutil` to read:
 - process executable/app name
 - idle duration via Windows last-input timestamp
 
-It does not import Quartz, AppKit, or AppleScript on Windows.
+It does not import Quartz, AppKit, or AppleScript on Windows. If `pywin32`
+or `psutil` is missing, the Windows adapter returns an explicit
+`missing_windows_dependency` status instead of crashing the HUD.
+
+Dependency files are split by runtime surface:
+
+- `requirements.txt`: shared Python/PySide app dependencies
+- `requirements-windows.txt`: shared dependencies plus Windows telemetry dependencies
+- `requirements-macos.txt`: shared dependencies plus macOS telemetry dependencies
 
 ## Optional Spotify Setup
 
@@ -125,6 +134,29 @@ Use **Start** to begin live telemetry. Use **Stop** to stop the tracker. Use **E
 
 Expanded mode also shows the active telemetry platform, adapter, and permission/status signal so macOS and Windows collaborators can quickly tell whether the native tracker is running or a safe fallback is active.
 
+## Local Diagnostics
+
+Runtime diagnostics are local and bounded. Crash and startup diagnostics write to
+`data/diagnostics.log` with rotation. Foreground telemetry writes to
+`data/activity_log.json` with bounded rotation so long-running prototype sessions
+do not grow the active log indefinitely.
+
+Diagnostics do not add screenshots, keystrokes, clipboard access, camera,
+microphone, browser page text, URLs, or screen recording.
+
+## Windows Packaging Prep
+
+Packaging is intentionally light for now. Validate the source run first, then
+install PyInstaller only in the packaging environment:
+
+```powershell
+python -m pip install pyinstaller
+python -m PyInstaller --name Intentional --windowed --onedir desktop_app/main.py
+```
+
+After building, smoke test the executable from `dist\Intentional\`. Keep using
+the source run commands during active development.
+
 ## Demo Mode
 
 Click **Demo** in the HUD. Demo Mode cycles through mocked snapshots without live telemetry:
@@ -150,6 +182,7 @@ Expanded mode includes **Reset Session**. It archives current local telemetry an
 - Runtime data is local and ignored by git.
 
 ## Troubleshooting
+
 ## Windows Prerequisites
 
 Before running the project on Windows, install:
@@ -172,16 +205,17 @@ Before running the project on Windows, install:
 
    ```text
    http://127.0.0.1:8888/callback
+   ```
 
 If PySide6 is missing:
 
-```bash
-pip install -r requirements.txt
+```powershell
+python -m pip install -r requirements.txt
 ```
 
 If macOS telemetry falls back to `Unknown`, check Accessibility and Automation permissions for the terminal or Python environment running the app.
 
-If Windows telemetry falls back to `Unknown`, confirm `requirements-windows.txt` installed successfully and run:
+If Windows telemetry shows `missing_windows_dependency` or falls back to `Unknown`, confirm `requirements-windows.txt` installed successfully and run:
 
 ```powershell
 python -m telemetry.activity_tracker --once

@@ -32,7 +32,10 @@ from core.paths import data_path
 from desktop_app.agent_controller import AgentController
 from telemetry.log_store import ensure_parent_dir
 
-PRIVACY_NOTE = "No screenshots, keystrokes, clipboard, or page text are collected."
+PRIVACY_NOTE = (
+    "No screenshots, recording, keystrokes, clipboard, camera, mic, "
+    "or page text are collected."
+)
 
 
 class StateRingWidget(QWidget):
