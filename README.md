@@ -89,6 +89,12 @@ python -m telemetry.activity_tracker --once
 python -m desktop_app.main
 ```
 
+Or create/use the local virtual environment and launch the HUD with:
+
+```powershell
+.\scripts\run_windows.ps1
+```
+
 Windows telemetry uses `pywin32` and `psutil` to read:
 
 - foreground window handle
@@ -144,18 +150,39 @@ do not grow the active log indefinitely.
 Diagnostics do not add screenshots, keystrokes, clipboard access, camera,
 microphone, browser page text, URLs, or screen recording.
 
-## Windows Packaging Prep
+## Windows Packaging
 
-Packaging is intentionally light for now. Validate the source run first, then
-install PyInstaller only in the packaging environment:
+Packaging is intentionally light for now: a tracked PyInstaller spec creates a
+one-directory app bundle, not an MSI or installer.
+
+From the repository root on Windows:
 
 ```powershell
-python -m pip install pyinstaller
-python -m PyInstaller --name Intentional --windowed --onedir desktop_app/main.py
+.\packaging\windows\build_windows.ps1
 ```
 
-After building, smoke test the executable from `dist\Intentional\`. Keep using
-the source run commands during active development.
+The build script creates or reuses `.venv`, installs `requirements.txt`,
+installs `requirements-windows.txt`, installs PyInstaller, runs the Python test
+suite, runs `compileall` across the app modules, and builds with
+`packaging\windows\Drift.spec`.
+
+Expected output:
+
+```text
+dist\Drift\Drift.exe
+```
+
+Smoke test the packaged app with:
+
+```powershell
+.\dist\Drift\Drift.exe
+```
+
+To skip reinstalling dependencies after a successful setup:
+
+```powershell
+.\packaging\windows\build_windows.ps1 -SkipInstall
+```
 
 ## Demo Mode
 
@@ -220,5 +247,11 @@ If Windows telemetry shows `missing_windows_dependency` or falls back to `Unknow
 ```powershell
 python -m telemetry.activity_tracker --once
 ```
+
+If the Windows build cannot find PyInstaller, rerun
+`.\packaging\windows\build_windows.ps1` without `-SkipInstall`.
+
+If a stale packaged build behaves unexpectedly after dependency changes, remove
+`build\` and `dist\`, then rerun the build script.
 
 If Spotify context is unavailable, verify `.env` exists and playback is active. The app should still run without Spotify.

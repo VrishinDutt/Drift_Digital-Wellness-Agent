@@ -3,6 +3,9 @@
 .cache
 .cache-*
 
+build/
+dist/
+
 venv/
 .venv/
 __pycache__/
